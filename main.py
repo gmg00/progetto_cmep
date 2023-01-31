@@ -4,28 +4,34 @@ from matplotlib.colors import ListedColormap
 from keras.layers import Dense, Input, Dropout
 from keras.models import Model
 import tensorflow as tf
-import ROOT
-import pandas
+
 from math import *
+# Fixing random state for reproducibility
+np.random.seed(123)
 
-rdf = ROOT.RDataFrame("Events", "root://eospublic.cern.ch//eos/root-eos/cms_opendata_2012_nanoaod/Run2012B_DoubleMuParked.root")
-print(rdf.GetColumnNames())
+def get_cov(filename):
+    '''Get covariance matrix from file 'filename'.
+    '''
+    return cov = np.load(filename)
 
-print(pandas.DataFrame(rdf_mass.AsNumpy(["Dimuon_mass", "event", "run"])))
+def print_cov(cov):
+    '''Print covariance matrix from the array of 15 values.
+    '''
+    print(cov[0:5])
+    print((cov[1],cov[5:9]))
+    print((cov[2], cov[6], cov[9:12]))
+    print((cov[3], cov[7], cov[10], cov[12:14]))
+    print((cov[4], cov[8], cov[11], cov[13], cov[14]))
 
-'''
-N=10000
-phi = 1.0 * np.random.uniform(0,2.*pi,N)
-r = 1.0 * np.random.uniform(1,1.05,N)
-x1= r*np.cos(phi)
-x2= r*np.sin(phi)
+def hist_res(res, n_bins=50, title='Residuals distribution', x_label='x label',
+             y_label='y label'):
+    '''Take residuals and plot histogram. 
+    '''
+    plt.hist(res, n_bins)
+    plt.title(title, size=15)
+    plt.xlabel(x_label, size=12)
+    plt.ylabel(y_label, size=12)
 
-X=np.stack((x1,x2),axis=1)
-print(f"X shape: {X.shape}")
-
-plt.scatter(X[:, 0], X[:, 1])
-plt.show()
-input("Premi un tasto per continuare")
 
 
 inputs=Input(shape=(2,))
@@ -87,5 +93,5 @@ deco=decoder.predict(latent)
 plt.scatter(deco[:, 0], deco[:, 1], c=latent, cmap=plt.cm.RdBu, edgecolors='k')
 plt.show()
 input("Premi per finire")
-'''
+
 
