@@ -95,14 +95,14 @@ def save_instance(filename, inst):
 if __name__ == "__main__":
 
     #Get covariance matrix.
-    filename = '/mnt/c/Users/HP/Desktop/progetto_cmep/COV/cov_tot.npy'
+    filename = '/mnt/c/Users/HP/Desktop/cov_tot.npy'
     cov = get_file(filename)
 
     print(f'Dataset size: {cov.size}')
     print(f'Dataset shape: {cov.shape}')
 
     #Get parameters for conditioning.
-    filename = '/mnt/c/Users/HP/Desktop/progetto_cmep/PAR/par_tot.npy'
+    filename = '/mnt/c/Users/HP/Desktop/par_tot.npy'
     par = get_file(filename)
 
     print(f'Dataset size: {par.size}')
@@ -114,11 +114,11 @@ if __name__ == "__main__":
     par_train = par[:1*10**6,:]
     par_test = par[1*10**6:,:]
 
-    cov_train, cov_test, par_train, par_test = train_test_split(cov, par, test_size=0.8, random_state=42)
+    cov_train, cov_test, par_train, par_test = train_test_split(cov, par, test_size=0.9, random_state=42)
     print(f'cov_train size = {cov_train.size}')
     print(f'par_train size = {par_train.size}')
 
-    
+    '''
     ##Create an autoencoder model.
     #Input data.
     input_data = Input(shape=(15,))  
@@ -143,7 +143,7 @@ if __name__ == "__main__":
     hidden=Dense(50,activation='relu')(hidden)
     #Output.
     outputs = Dense(15, activation='linear')(hidden)
-    
+    '''
     '''
     input_data = Input(shape=(15,))  
     #Input parameters for conditioning.
@@ -183,7 +183,7 @@ if __name__ == "__main__":
     hidden = Dropout(0.2)(hidden)
     outputs = Dense(15, activation='linear')(hidden)
     '''
-    '''
+    
     ##Create an autoencoder model.
     #Input data.
     input_data = Input(shape=(15,))  
@@ -193,28 +193,30 @@ if __name__ == "__main__":
 
     #Encoder.
     hidden2 = Dense(50,activation='relu')(input_params)
-    hidden=Dense(50,activation='relu')(input_data)
-    hidden=Dense(100,activation='relu')(hidden)
+    hidden = Dense(50,activation='relu')(input_data)
+    hidden = Dense(100,activation='relu')(hidden)
     concat = Concatenate()([hidden, hidden2])
-    hidden=Dense(30,activation='relu')(concat)
+    hidden = Dense(50,activation='relu')(concat)
     hidden = BatchNormalization()(hidden)
 
     code=Dense(5,activation='sigmoid')(hidden) #Encoded.
 
     #Decoder.
-    hidden=Dense(30,activation='relu')(code)
-    hidden=Dense(100,activation='relu')(hidden)
-    hidden=Dense(50,activation='relu')(hidden)
+    hidden = Dense(30,activation='relu')(code)
+    hidden3 = Dense(50,activation='relu')(input_params)
+    hidden = Dense(100,activation='relu')(hidden)
+    concat = Concatenate()([hidden, hidden3])
+    hidden = Dense(50,activation='relu')(concat)
     #Output.
     outputs = Dense(15, activation='linear')(hidden)
-    '''
+    
     model = Model(inputs=[input_data, input_params], outputs=outputs)
     model.compile(loss='MSE', optimizer='adam')
     model.summary()
     
     #0.0036 0.0834
 
-    #tf.keras.utils.plot_model(model, "model.png",show_shapes=True)
+    tf.keras.utils.plot_model(model, "model.png",show_shapes=True)
 
     input("Press a button to start training")
 
@@ -223,14 +225,14 @@ if __name__ == "__main__":
     dt = {
         "validation_split" : 0.5,
         "epochs" : 500,
-        "batch_size" : 256,
+        "batch_size" : 50,
         #Early stopping settings.
         "EarlyStopping_monitor" : "val_loss",
-        "EarlyStopping_patience" : 100,
+        "EarlyStopping_patience" : 75,
         #Reduce learning rate on plateau settings.
         "ReduceLROnPlateau_monitor" : "val_loss",
         "ReduceLROnPlateau_factor" : 0.25,
-        "ReduceLROnPlateau_patience" : 25
+        "ReduceLROnPlateau_patience" : 50
         }
 
     ##Training.
@@ -275,8 +277,8 @@ if __name__ == "__main__":
     input("Press a button to continue")
 
     ##Test
-    test_data = cov_test[0:1000, :]
-    test_params = par_test[0:1000, :]
+    test_data = cov_test[0:1*10**6, :]
+    test_params = par_test[0:1*10**6, :]
     cov_pred = model.predict([test_data, test_params])
 
     for i in range(15):
