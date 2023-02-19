@@ -29,7 +29,7 @@ def print_cov(cov):
     print((cov[4], cov[8], cov[11], cov[13], cov[14]))
 
 def hist_res(res, n_bins=50, title='Residuals distribution', x_label='x label',
-             y_label='y label'):
+             y_label='Residuals'):
     '''Take residuals and plot histogram. 
     '''
     plt.hist(res, n_bins)
@@ -90,6 +90,7 @@ def save_instance(filename, inst):
             with open(filename, 'wb') as inst_file:
                 pickle.dump(arr, inst_file)
     except: print("Error in save_instance.")
+ 
 
 #---------------------------------------------------------------------MAIN
 if __name__ == "__main__":
@@ -117,72 +118,6 @@ if __name__ == "__main__":
     cov_train, cov_test, par_train, par_test = train_test_split(cov, par, test_size=0.9, random_state=42)
     print(f'cov_train size = {cov_train.size}')
     print(f'par_train size = {par_train.size}')
-
-    '''
-    ##Create an autoencoder model.
-    #Input data.
-    input_data = Input(shape=(15,))  
-    #Input parameters for conditioning.
-    input_params = Input(shape=(5,))
-    #Concatenate the two input layers.
-
-    #Encoder.
-    hidden=Dense(50,activation='relu')(input_data)
-    hidden=Dense(100,activation='relu')(hidden)
-    hidden=Dense(100,activation='relu')(hidden)
-    concat = Concatenate()([hidden, input_params])
-    hidden=Dense(30,activation='relu')(concat)
-    hidden = BatchNormalization()(hidden)
-
-    code=Dense(5,activation='sigmoid')(hidden) #Encoded.
-
-    #Decoder.
-    hidden=Dense(30,activation='relu')(code)
-    hidden=Dense(100,activation='relu')(hidden)
-    hidden=Dense(100,activation='relu')(hidden)
-    hidden=Dense(50,activation='relu')(hidden)
-    #Output.
-    outputs = Dense(15, activation='linear')(hidden)
-    '''
-    '''
-    input_data = Input(shape=(15,))  
-    #Input parameters for conditioning.
-    input_params = Input(shape=(5,))
-    #Concatenate the two input layers.
-    hidden1 = hidden=Dense(32,activation='relu')(input_data)
-    hidden2 = hidden=Dense(16,activation='relu')(input_params)
-    concat = Concatenate()([hidden1, hidden2])
-    hidden=Dense(128,activation='relu')(concat)
-    hidden=Dense(64,activation='relu')(hidden)
-    hidden=Dense(32,activation='relu')(hidden)
-    hidden=Dense(16,activation='relu')(hidden)
-    hidden=Dense(64,activation='relu')(hidden)
-    hidden=Dense(16,activation='relu')(hidden)
-    concat = Concatenate()([hidden, hidden2])
-    #Encoder.
-    hidden=Dense(64,activation='relu')(hidden)
-   
-   #hidden = BatchNormalization()(hidden)
-    #concat = Concatenate()([hidden, input_params])
-    #hidden=Dense(32,activation='relu')(hidden)
-    hidden = BatchNormalization()(hidden)
-
-    code=Dense(5,activation='sigmoid')(hidden) #Encoded.
-    #xdd
-    #Decoder.
-    hidden=Dense(64,activation='relu')(hidden)
-    hidden=Dense(16,activation='relu')(hidden)
-    hidden=Dense(16,activation='relu')(code)
-    hidden=Dense(32,activation='relu')(hidden)
-    hidden=Dense(64,activation='relu')(hidden)
-    hidden=Dense(128,activation='relu')(hidden)
-
-    #hidden = BatchNormalization()(hidden)
-    #hidden=Dense(64,activation='relu')(hidden)
-    #Output.
-    hidden = Dropout(0.2)(hidden)
-    outputs = Dense(15, activation='linear')(hidden)
-    '''
     
     ##Create an autoencoder model.
     #Input data.
@@ -204,8 +139,9 @@ if __name__ == "__main__":
     #Decoder.
     hidden = Dense(30,activation='relu')(code)
     hidden3 = Dense(50,activation='relu')(input_params)
-    hidden = Dense(100,activation='relu')(hidden)
     concat = Concatenate()([hidden, hidden3])
+    hidden = Dense(100,activation='relu')(concat)
+    concat = Concatenate()([hidden, input_params])
     hidden = Dense(50,activation='relu')(concat)
     #Output.
     outputs = Dense(15, activation='linear')(hidden)
@@ -224,8 +160,8 @@ if __name__ == "__main__":
     #Dictionary for training settings
     dt = {
         "validation_split" : 0.5,
-        "epochs" : 500,
-        "batch_size" : 50,
+        "epochs" : 10,
+        "batch_size" : 100,
         #Early stopping settings.
         "EarlyStopping_monitor" : "val_loss",
         "EarlyStopping_patience" : 75,
@@ -251,7 +187,7 @@ if __name__ == "__main__":
     plt.show()
 
     input("Press a button to continue")
-
+    '''
     ##Save instance in log.
     inp = input("Press 'y' if you want to save this instance.")
     if inp == "y":
@@ -267,7 +203,7 @@ if __name__ == "__main__":
 
     ##Encoder-decoder division.
     encoder = Model(inputs=[input_data, input_params], outputs=code)
-    decoder = Model(inputs=code , outputs=outputs)
+    decoder = Model(inputs=[code, input_params] , outputs=outputs)
     print("Prediction of ")
     encoded_cov = encoder.predict([cov_test[0:2, :], par_test[0:2, :]])
     print(encoded_cov)
@@ -275,15 +211,24 @@ if __name__ == "__main__":
     print(f'nbytes original matrix: {cov_test[0:2,:].nbytes}')
 
     input("Press a button to continue")
+    '''
 
     ##Test
-    test_data = cov_test[0:1*10**6, :]
-    test_params = par_test[0:1*10**6, :]
+    test_data, A, test_params, B = train_test_split(cov_test, par_test, test_size=0.9, random_state=42)
+    
+    #test_data = cov_test[0:1*10**6, :]
+    #test_params = par_test[0:1*10**6, :]
     cov_pred = model.predict([test_data, test_params])
 
-    for i in range(15):
-        print(f'i = {i}')
-        hist_res(test_data[:,i]-cov_pred[:,i], n_bins=30)
+    print(test_data.shape)
+    print(cov_pred.shape)
+    
+    index = [0, 5, 9, 12, 14]
+    x_labels = ['qoverp', 'lambda', 'phi', 'dxy', 'dsz']
+
+    for i, elem in enumerate(index):
+        print(f'i = {elem}')
+        hist_res(test_data[:, elem] - cov_pred[:, elem], n_bins=30, x_label = x_labels[i])
         plt.show()
         
 
