@@ -115,7 +115,7 @@ if __name__ == "__main__":
     par_train = par[:1*10**6,:]
     par_test = par[1*10**6:,:]
 
-    cov_train, cov_test, par_train, par_test = train_test_split(cov, par, test_size=0.9, random_state=42)
+    cov_train, cov_test, par_train, par_test = train_test_split(cov, par, test_size=0.93, random_state=42)
     print(f'cov_train size = {cov_train.size}')
     print(f'par_train size = {par_train.size}')
     
@@ -129,7 +129,8 @@ if __name__ == "__main__":
     #Encoder.
     hidden2 = Dense(50,activation='relu')(input_params)
     hidden = Dense(50,activation='relu')(input_data)
-    hidden = Dense(100,activation='relu')(hidden)
+    concat = Concatenate()([hidden, input_params])
+    hidden = Dense(100,activation='relu')(concat)
     concat = Concatenate()([hidden, hidden2])
     hidden = Dense(50,activation='relu')(concat)
     hidden = BatchNormalization()(hidden)
@@ -139,9 +140,9 @@ if __name__ == "__main__":
     #Decoder.
     hidden = Dense(30,activation='relu')(code)
     hidden3 = Dense(50,activation='relu')(input_params)
-    concat = Concatenate()([hidden, hidden3])
-    hidden = Dense(100,activation='relu')(concat)
     concat = Concatenate()([hidden, input_params])
+    hidden = Dense(100,activation='relu')(concat)
+    concat = Concatenate()([hidden, hidden3])
     hidden = Dense(50,activation='relu')(concat)
     #Output.
     outputs = Dense(15, activation='linear')(hidden)
@@ -160,7 +161,7 @@ if __name__ == "__main__":
     #Dictionary for training settings
     dt = {
         "validation_split" : 0.5,
-        "epochs" : 10,
+        "epochs" : 500,
         "batch_size" : 100,
         #Early stopping settings.
         "EarlyStopping_monitor" : "val_loss",
@@ -214,21 +215,24 @@ if __name__ == "__main__":
     '''
 
     ##Test
-    test_data, A, test_params, B = train_test_split(cov_test, par_test, test_size=0.9, random_state=42)
+    test_data, A, test_params, B = train_test_split(cov_test, par_test, test_size=0.95, random_state=42)
     
     #test_data = cov_test[0:1*10**6, :]
     #test_params = par_test[0:1*10**6, :]
     cov_pred = model.predict([test_data, test_params])
 
+    np.save('/mnt/c/Users/HP/Desktop/cov_pred.npy',cov_pred)
+    np.save('/mnt/c/Users/HP/Desktop/test_data.npy',test_data)
+
     print(test_data.shape)
     print(cov_pred.shape)
     
     index = [0, 5, 9, 12, 14]
-    x_labels = ['qoverp', 'lambda', 'phi', 'dxy', 'dsz']
+    titles = ['qoverp', 'lambda', 'phi', 'dxy', 'dsz']
 
     for i, elem in enumerate(index):
         print(f'i = {elem}')
-        hist_res(test_data[:, elem] - cov_pred[:, elem], n_bins=30, x_label = x_labels[i])
+        hist_res((test_data[:, elem] - cov_pred[:, elem]) / test_data[:, elem], n_bins=30, title = titles[i], y_label='N', x_label = 'Norm. res.')
         plt.show()
         
 
