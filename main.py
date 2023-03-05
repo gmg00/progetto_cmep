@@ -36,6 +36,7 @@ def hist_res(res, n_bins=50, title='Residuals distribution', x_label='x label',
     plt.title(title, size=15)
     plt.xlabel(x_label, size=12)
     plt.ylabel(y_label, size=12)
+    plt.grid()
     plt.show()
 
 def plot_loss(loss, val_loss):
@@ -90,6 +91,28 @@ def save_instance(filename, inst):
             with open(filename, 'wb') as inst_file:
                 pickle.dump(arr, inst_file)
     except: print("Error in save_instance.")
+
+def generator(X1_data, X2_data, batch_size):
+
+    samples_per_epoch = X1_data.shape[0]
+    number_of_batches = samples_per_epoch/batch_size
+    ids = np.arange(len(cov_train))
+    counter=0
+    X1_batch = []
+    X2_batch = []
+    while 1:
+        if counter == 0:
+            np.random.shuffle(ids)
+            X1_data = X1_data[ids]
+            X2_data = X2_data[ids]
+        X1_batch = np.array(X1_data[batch_size*counter:batch_size*(counter+1)]).astype('float32')
+        X2_batch = np.array(X2_data[batch_size*counter:batch_size*(counter+1)]).astype('float32')
+        counter += 1
+        yield [X1_batch,X2_batch],X1_batch
+
+        #restart counter to yeild data in the next epoch as well
+        if counter >= number_of_batches:
+            counter = 0
  
 
 #---------------------------------------------------------------------MAIN
@@ -110,14 +133,9 @@ if __name__ == "__main__":
     print(f'Dataset shape: {par.shape}')
 
     #Split dataset in training and test
-    cov_train = cov[:1*10**6,:]
-    cov_test = cov[1*10**6:,:]
-    par_train = par[:1*10**6,:]
-    par_test = par[1*10**6:,:]
-
-    cov_train, cov_test, par_train, par_test = train_test_split(cov, par, test_size=0.92, random_state=42)
-    print(f'cov_train size = {cov_train.size}')
-    print(f'par_train size = {par_train.size}')
+    cov_train, cov_test, par_train, par_test = train_test_split(cov, par, test_size=0.5, random_state=42)
+    print(f'cov_train shape = {cov_train.shape}')
+    print(f'par_train shape = {par_train.shape}')
     
     ##Create an autoencoder model.
     #Input data.
@@ -151,11 +169,6 @@ if __name__ == "__main__":
     model.compile(loss='MSE', optimizer='adam')
     model.summary()
     
-
-    tf.keras.utils.plot_model(model, "model.png",show_shapes=True)
-
-    input("Press a button to start training")
-
     
     #Dictionary for training settings
     dt = {
@@ -172,16 +185,25 @@ if __name__ == "__main__":
         }
 
     ##Training.
-    t_0 = time.time()
     
-    history=model.fit([cov_train, par_train], cov_train, validation_split=dt["validation_split"],epochs=dt["epochs"],verbose=1, batch_size=dt["batch_size"],
-                             callbacks = [EarlyStopping(monitor=dt["EarlyStopping_monitor"], patience=dt["EarlyStopping_patience"], verbose=1),
-                                          ReduceLROnPlateau(monitor=dt["ReduceLROnPlateau_monitor"], factor=dt["ReduceLROnPlateau_factor"],
-                                                            patience=dt["ReduceLROnPlateau_patience"], verbose=1)])
-   
-    #history=model.fit([cov_train, par_train], cov_train, validation_split=dt["validation_split"],epochs=500,verbose=1)
-    elapsed_time = time.time() - t_0
-    print(f'Training time: {elapsed_time}')
+    #Split cov_train and par_train in train and validation datasets.
+    cov_train, cov_val, par_train, par_val = train_test_split(cov_train, par_train, test_size=0.5, random_state=42)
+
+    print(f'len/batch_size = {cov_train.shape[0]//dt["batch_size"]}')
+
+    input("Press a button to start training")
+
+    history = model.fit(
+        generator(cov_train,par_train,dt['batch_size']),
+        epochs=dt['epochs'],
+        steps_per_epoch = cov_train.shape[0]//dt['batch_size'],
+        validation_data = generator(cov_val,par_val,dt['batch_size']),
+        validation_steps = cov_val.shape[0]//dt['batch_size'],
+        #use_multiprocessing = True,
+        callbacks = [EarlyStopping(monitor=dt["EarlyStopping_monitor"], patience=dt["EarlyStopping_patience"], verbose=1),
+                     ReduceLROnPlateau(monitor=dt["ReduceLROnPlateau_monitor"], factor=dt["ReduceLROnPlateau_factor"],
+                                       patience=dt["ReduceLROnPlateau_patience"], verbose=1)])
+
     ##Plot loss.
     plot_loss(history.history['loss'], history.history['val_loss'])
     plt.show()
@@ -231,7 +253,11 @@ if __name__ == "__main__":
     # Da applicare taglio
     for i, elem in enumerate(index):
         print(f'i = {elem}')
-        hist_res((test_data[:, elem] - cov_pred[:, elem]) / test_data[:, elem], n_bins=80, title = titles[i], y_label='N', x_label = 'Norm. res.')
+        #Calculate residuals.
+        res = abs((test_data[:, elem] - cov_pred[:, elem])/test_data[:, elem])
+        x = res[res < np.percentile(res, 95)]
+        #Plot histogram.
+        hist_res(x, n_bins=80, title = titles[i], y_label='N', x_label = 'Norm. res.')
         plt.show()
         
 
