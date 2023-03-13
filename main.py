@@ -9,6 +9,7 @@ from keras.models import Model
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
+from sklearn import preprocessing
 
 from math import *
 # Fixing random state for reproducibility
@@ -107,12 +108,31 @@ def generator(X1_data, X2_data, batch_size):
             X2_data = X2_data[ids]
         X1_batch = np.array(X1_data[batch_size*counter:batch_size*(counter+1)]).astype('float32')
         X2_batch = np.array(X2_data[batch_size*counter:batch_size*(counter+1)]).astype('float32')
+
         counter += 1
         yield [X1_batch,X2_batch],X1_batch
 
         #restart counter to yeild data in the next epoch as well
         if counter >= number_of_batches:
             counter = 0
+
+def predict_generator(X1_data, X2_data, batch_size):
+
+    samples_per_epoch = X1_data.shape[0]
+    number_of_batches = samples_per_epoch/batch_size
+    ids = np.arange(len(cov_train))
+    counter=0
+    X1_batch = []
+    X2_batch = []
+    while 1:
+        X1_batch = np.array(X1_data[batch_size*counter:batch_size*(counter+1)]).astype('float32')
+        X2_batch = np.array(X2_data[batch_size*counter:batch_size*(counter+1)]).astype('float32')
+
+        counter += 1
+        if counter >= number_of_batches: return [X1_batch, X2_batch]
+        yield [X1_batch,X2_batch]
+
+            
  
 
 #---------------------------------------------------------------------MAIN
@@ -132,6 +152,22 @@ if __name__ == "__main__":
     print(f'Dataset size: {par.size}')
     print(f'Dataset shape: {par.shape}')
 
+    #Normalize dataset
+    #cov = cov/np.max(cov)
+    #par = par/np.max(par)
+    #Standardize dataset
+    scaler_cov = preprocessing.StandardScaler().fit(cov)
+    scaler_par = preprocessing.StandardScaler().fit(par)
+
+    cov = scaler_cov.transform(cov)
+    par = scaler_par.transform(par)
+
+    print('Mean of each column in matric covariance dataset:')
+    print(cov.mean(axis=0))
+
+    print('Standard deviation of each column in matric covariance dataset:')
+    print(cov.std(axis=0))
+
     #Split dataset in training and test
     cov_train, cov_test, par_train, par_test = train_test_split(cov, par, test_size=0.5, random_state=42)
     print(f'cov_train shape = {cov_train.shape}')
@@ -149,6 +185,7 @@ if __name__ == "__main__":
     hidden = Dense(50,activation='relu')(input_data)
     concat = Concatenate()([hidden, input_params])
     hidden = Dense(100,activation='relu')(concat)
+    hidden = Dense(150,activation='relu')(hidden)
     concat = Concatenate()([hidden, hidden2])
     hidden = Dense(50,activation='relu')(concat)
     hidden = BatchNormalization()(hidden)
@@ -159,7 +196,8 @@ if __name__ == "__main__":
     hidden = Dense(30,activation='relu')(code)
     hidden3 = Dense(50,activation='relu')(input_params)
     concat = Concatenate()([hidden, input_params])
-    hidden = Dense(100,activation='relu')(concat)
+    hidden = Dense(150,activation='relu')(concat)
+    hidden = Dense(100,activation='relu')(hidden)
     concat = Concatenate()([hidden, hidden3])
     hidden = Dense(50,activation='relu')(concat)
     #Output.
@@ -177,11 +215,11 @@ if __name__ == "__main__":
         "batch_size" : 150,
         #Early stopping settings.
         "EarlyStopping_monitor" : "val_loss",
-        "EarlyStopping_patience" : 75,
+        "EarlyStopping_patience" : 60,
         #Reduce learning rate on plateau settings.
         "ReduceLROnPlateau_monitor" : "val_loss",
         "ReduceLROnPlateau_factor" : 0.25,
-        "ReduceLROnPlateau_patience" : 50
+        "ReduceLROnPlateau_patience" : 30
         }
 
     ##Training.
@@ -236,16 +274,19 @@ if __name__ == "__main__":
     '''
 
     ##Test
-    test_data, A, test_params, B = train_test_split(cov_test, par_test, test_size=0.95, random_state=42)
+    cov_test, A, par_test, B = train_test_split(cov_test, par_test, test_size=0.95, random_state=42)
     
     #test_data = cov_test[0:1*10**6, :]
     #test_params = par_test[0:1*10**6, :]
-    cov_pred = model.predict([test_data, test_params])
+    #cov_pred = model.predict([test_data, test_params])
+    cov_pred = model.predict(predict_generator(cov_test,par_test,dt['batch_size']),
+                             steps = cov_train.shape[0]//dt['batch_size'],
+                             verbose = 1)
 
     np.save('/mnt/c/Users/HP/Desktop/cov_pred.npy',cov_pred)
-    np.save('/mnt/c/Users/HP/Desktop/test_data.npy',test_data)
+    np.save('/mnt/c/Users/HP/Desktop/cov_test.npy',cov_test)
 
-    print(test_data.shape)
+    print(cov_test.shape)
     print(cov_pred.shape)
     
     index = [0, 5, 9, 12, 14]
@@ -254,7 +295,7 @@ if __name__ == "__main__":
     for i, elem in enumerate(index):
         print(f'i = {elem}')
         #Calculate residuals.
-        res = abs((test_data[:, elem] - cov_pred[:, elem])/test_data[:, elem])
+        res = abs((cov_test[:, elem] - cov_pred[:, elem])/cov_test[:, elem])
         x = res[res < np.percentile(res, 95)]
         #Plot histogram.
         hist_res(x, n_bins=80, title = titles[i], y_label='N', x_label = 'Norm. res.')
