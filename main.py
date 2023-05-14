@@ -151,11 +151,11 @@ if __name__ == "__main__":
     #cov = cov/np.max(cov)
     #par = par/np.max(par)
     #Standardize dataset
-    scaler_cov = preprocessing.StandardScaler().fit(cov)
-    #scaler_par = preprocessing.StandardScaler().fit(par)
+    scaler_cov = preprocessing.Normalizer().fit(cov)
+    scaler_par = preprocessing.Normalizer().fit(par)
 
     cov = scaler_cov.transform(cov)
-    #par = scaler_par.transform(par)
+    par = scaler_par.transform(par)
 
     print('Mean of each column in matric covariance dataset:')
     print(cov.mean(axis=0))
@@ -167,43 +167,134 @@ if __name__ == "__main__":
     cov_train, cov_test, par_train, par_test = train_test_split(cov, par, test_size=0.5, random_state=42)
     print(f'cov_train shape = {cov_train.shape}')
     print(f'par_train shape = {par_train.shape}')
-    
+
+
     ##Create an autoencoder model.
     #Input data.
     input_data = Input(shape=(15,))  
     #Input parameters for conditioning.
     input_params = Input(shape=(5,))
-    #Concatenate the two input layers.
 
+    '''
+    #-----------------------------------MODEL TESTED -> OVERFITTING -> ?Too complex, too many layers?
+    hidden = Dense(150, activation='relu')(input_data)
+    concat = Concatenate()([hidden,input_params])
+    hidden = Dense(100, activation='relu')(concat)
+    hidden2 = Dense(50, activation='relu')(input_params)
+    concat = Concatenate()([hidden,hidden2])
+    hidden = Dense(50, activation='relu')(concat)
+
+    hidden = BatchNormalization()(hidden)
+
+    code = Dense(5, activation='sigmoid')(hidden)
+
+    hidden = Dense(50, activation='relu')(code)
+    hidden2 = Dense(50, activation='relu')(input_params)
+    concat = Concatenate()([hidden, hidden2])
+    hidden = Dense(100, activation='relu')(concat)
+    concat = Concatenate()([hidden,input_params])
+    hidden = Dense(150, activation='relu')(concat)
+
+    outputs = Dense(15, activation='linear')(hidden)
+    '''
+
+
+    
+    #-----------------------------------MODEL TESTED -> Val_loss can't go under 0.2
     #Encoder.
     concat = Concatenate()([input_data, input_params])
-    hidden = Dense(20,activation='relu')(concat)
-    #concat = Concatenate()([hidden, input_params])
-    hidden = Dense(50,activation='relu')(hidden)
-    #hidden = Dense(150,activation='relu')(hidden)
-    #concat = Concatenate()([hidden, input_params])
-    hidden = Dense(10,activation='relu')(hidden)
+
+    hidden = Dense(300,activation='relu')(concat)
+
+    hidden = Dense(200,activation='relu')(hidden)
+    #hidden = Dropout(0.2)(hidden)
+
+    hidden = Dense(100,activation='relu')(hidden)
+
     #hidden = BatchNormalization()(hidden)
 
     code=Dense(5,activation='sigmoid')(hidden) #Encoded.
 
     #Decoder.
     concat = Concatenate()([code, input_params])
-    hidden = Dense(10,activation='relu')(concat)
-    #hidden3 = Dense(50,activation='relu')(input_params)
-    #concat = Concatenate()([hidden, input_params])
-    #hidden = Dense(150,activation='relu')(concat)
-    hidden = Dense(50,activation='relu')(hidden)
-    #concat = Concatenate()([hidden, input_params])
-    hidden = Dense(20,activation='relu')(hidden)
+
+    hidden = Dense(100,activation='relu')(concat)
+
+    hidden = Dense(200,activation='relu')(hidden)
     #hidden = Dropout(0.2)(hidden)
+
+    hidden = Dense(300,activation='relu')(hidden)
+
+    
     #Output.
     outputs = Dense(15, activation='linear')(hidden)
     
+    '''
+    --------------------------------------MODEL TESTED -> not better than the last
+      #Encoder.
+    #hidden1 = Dense(50,activation='relu')(input_data)
+    #hidden2 = Dense(50,activation='relu')(input_params)
+    concat = Concatenate()([input_data, input_params])
+
+    hidden = Dense(150,activation='relu')(concat)
+
+    hidden = Dense(100,activation='relu')(hidden)
+
+    hidden = Dense(50,activation='relu')(hidden)
+
+    hidden = BatchNormalization()(hidden)
+
+    code=Dense(5,activation='sigmoid')(hidden) #Encoded.
+
+    #Decoder.
+    #concat = Concatenate()([code, input_params])
+
+    hidden = Dense(50,activation='relu')(code)
+
+    hidden = Dense(100,activation='relu')(hidden)
+
+    hidden = Dense(150,activation='relu')(hidden)
+
+    concat = Concatenate()([hidden, input_params])
+
+    #Output.
+    outputs = Dense(15, activation='linear')(concat)
+    '''
+    '''
+    #Encoder.
+    #hidden = Dense(25, activation='relu')(input_data)
+    #hidden1 = Dense(25, activation='relu')(input_params)
+    concat = Concatenate()([input_data, input_params])
+
+    hidden = Dense(150,activation='relu')(concat)
+
+    #hidden = Dense(100,activation='relu')(hidden)
+
+    hidden = Dense(50,activation='relu')(hidden)
+
+    hidden = BatchNormalization()(hidden)
+
+    code=Dense(5,activation='sigmoid')(hidden) #Encoded.
+
+    #Decoder.
+    #hidden1 = Dense(25, activation='relu')(input_params)
+    concat = Concatenate()([code, input_params])
+
+    hidden = Dense(50,activation='relu')(concat)
+
+    #hidden = Dense(100,activation='relu')(hidden)
+
+    hidden = Dense(150,activation='relu')(hidden)
+    hidden = Dropout(0.2)(hidden)
+
+    #Output.
+    outputs = Dense(15, activation='linear')(hidden)
+    '''
+
     model = Model(inputs=[input_data, input_params], outputs=outputs)
     model.compile(loss='MSE', optimizer='adam')
     model.summary()
-    tf.keras.utils.plot_model(model, "/mnt/c/Users/HP/Desktop/model.png",show_shapes=True)
+    tf.keras.utils.plot_model(model, "/mnt/c/Users/HP/Desktop/history/model2_norm4.png",show_shapes=True)
     
     
     #Dictionary for training settings
@@ -243,10 +334,14 @@ if __name__ == "__main__":
 
     ##Plot loss.
     plot_loss(history.history['loss'], history.history['val_loss'])
-    plt.savefig('/mnt/c/Users/HP/Desktop/loss_image.png')
+    plt.savefig('/mnt/c/Users/HP/Desktop/history/loss_model2_norm4.png')
     plt.show()
 
+    input("Press a button to save history")
+    with open('/mnt/c/Users/HP/Desktop/history/history_model2_norm4', 'wb') as file_pi:
+        pickle.dump(history.history, file_pi)
     input("Press a button to continue")
+
     '''
     ##Save instance in log.
     inp = input("Press 'y' if you want to save this instance.")
@@ -283,9 +378,9 @@ if __name__ == "__main__":
                              steps = cov_test.shape[0]//dt['batch_size']+1,
                              verbose = 1)
     print('save?')
-    np.save('/mnt/c/Users/HP/Desktop/cov_pred.npy',cov_pred)
+    np.save('/mnt/c/Users/HP/Desktop/cov_pred3.npy',cov_pred)
     print('saved')
-    np.save('/mnt/c/Users/HP/Desktop/cov_test.npy',cov_test)
+    np.save('/mnt/c/Users/HP/Desktop/cov_test3.npy',cov_test)
 
     print(cov_test.shape)
     print(cov_pred.shape)
@@ -299,7 +394,8 @@ if __name__ == "__main__":
         res = (cov_test[:, elem] - cov_pred[:, elem])/cov_test[:, elem]
         #x = res[res < np.percentile(res, 95)]
         #Plot histogram.
-        hist_res(res, n_bins=80, title = titles[i], y_label='N', x_label = 'Norm. res.')
+        #hist_res(res, n_bins=int(np.max(res)-np.min(res)), title = titles[i], y_label='N', x_label = 'Norm. res.')
+        hist_res(res[(res<10) & (res>-10)], n_bins=80, title = titles[i], y_label='N', x_label = 'Norm. res.')
         plt.show()
         
 
