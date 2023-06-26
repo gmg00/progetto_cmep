@@ -53,7 +53,7 @@ def plot_loss(loss, val_loss):
     plt.grid()
     plt.legend(loc='best', fontsize=12)
     plt.title('Loss vs Validation Loss', size=15)
-    plt.grid()
+    
 
 class Log:
     def __init__(self, description, model, train_settings, training_time, loss, val_loss):
@@ -126,7 +126,38 @@ def predict_generator(X1_data, X2_data, batch_size):
         X1_batch = np.array(X1_data[batch_size*counter:batch_size*(counter+1)]).astype('float32')
         X2_batch = np.array(X2_data[batch_size*counter:batch_size*(counter+1)]).astype('float32')
         counter += 1
-        yield [X1_batch, X2_batch],
+        yield [X1_batch, X2_batch],1
+
+def my_metric(y_true, y_pred):
+    '''Computes loss = mean(sqrt(y_true - y_pred)**2 / y_true), axis=-1)
+    '''
+    
+    #temp = tf.math.xdivy(tf.math.sqrt(tf.square(y_true-y_pred)),tf.square(y_true))
+    index = [0,5,9,12,14]
+    y_true = tf.gather(y_true, indices=index)
+    y_pred = tf.gather(y_pred, indices=index)
+    temp = tf.math.sqrt(tf.math.xdivy(tf.square(y_true-y_pred),tf.square(y_true)))
+
+    return tf.reduce_mean(temp, axis=-1) 
+
+def my_metric2(y_true, y_pred):
+    '''Computes loss = mean(abs((y_true - y_pred) / y_true)), axis=-1)
+    '''
+    
+    temp = tf.math.sqrt(tf.math.xdivy(tf.square(y_true-y_pred),tf.square(y_true)))
+
+    return tf.reduce_mean(temp, axis=-1) 
+
+def my_metric3(y_true, y_pred):
+    '''Computes loss = mean(abs((y_true - y_pred) / y_true)), axis=-1)
+    '''
+    epsilon = 10**(-4)
+    index = [0,5,9,12,14]
+    y_true = tf.gather(y_true, indices=index)
+    y_pred = tf.gather(y_pred, indices=index)
+    temp = tf.math.sqrt(tf.math.xdivy(tf.square(y_true-y_pred),tf.square(y_true + epsilon)))
+
+    return tf.reduce_mean(temp, axis=-1) 
 
  
 
@@ -154,8 +185,8 @@ if __name__ == "__main__":
     scaler_cov = preprocessing.Normalizer().fit(cov)
     scaler_par = preprocessing.Normalizer().fit(par)
 
-    cov = scaler_cov.transform(cov)
-    par = scaler_par.transform(par)
+    #cov = scaler_cov.transform(cov)
+    #par = scaler_par.transform(par)
 
     print('Mean of each column in matric covariance dataset:')
     print(cov.mean(axis=0))
@@ -164,10 +195,25 @@ if __name__ == "__main__":
     print(cov.std(axis=0))
 
     #Split dataset in training and test
-    cov_train, cov_test, par_train, par_test = train_test_split(cov, par, test_size=0.5, random_state=42)
-    print(f'cov_train shape = {cov_train.shape}')
-    print(f'par_train shape = {par_train.shape}')
+    cov_train0, cov_test0, par_train0, par_test0 = train_test_split(cov, par, test_size=0.5, random_state=42)
+    print(f'cov_train shape = {cov_train0.shape}')
+    print(f'par_train shape = {par_train0.shape}')
 
+    cov_train = scaler_cov.transform(cov_train0)
+    cov_test = scaler_cov.transform(cov_test0)
+    par_train = scaler_par.transform(par_train0)
+    par_test = scaler_par.transform(par_test0)
+
+
+    #Get normalization factors for every row.
+    scal = []
+    for i in range(cov_test.shape[0]):
+        scal.append(cov_test0[i,0]/cov_test[i,0])
+        #if i%10000 == 0:
+            #print(i)
+
+    np.save('/mnt/c/Users/HP/Desktop/scal.npy',np.array(scal))
+    
 
     ##Create an autoencoder model.
     #Input data.
@@ -175,43 +221,16 @@ if __name__ == "__main__":
     #Input parameters for conditioning.
     input_params = Input(shape=(5,))
 
-    '''
-    #-----------------------------------MODEL TESTED -> OVERFITTING -> ?Too complex, too many layers?
-    hidden = Dense(150, activation='relu')(input_data)
-    concat = Concatenate()([hidden,input_params])
-    hidden = Dense(100, activation='relu')(concat)
-    hidden2 = Dense(50, activation='relu')(input_params)
-    concat = Concatenate()([hidden,hidden2])
-    hidden = Dense(50, activation='relu')(concat)
-
-    hidden = BatchNormalization()(hidden)
-
-    code = Dense(5, activation='sigmoid')(hidden)
-
-    hidden = Dense(50, activation='relu')(code)
-    hidden2 = Dense(50, activation='relu')(input_params)
-    concat = Concatenate()([hidden, hidden2])
-    hidden = Dense(100, activation='relu')(concat)
-    concat = Concatenate()([hidden,input_params])
-    hidden = Dense(150, activation='relu')(concat)
-
-    outputs = Dense(15, activation='linear')(hidden)
-    '''
-
-
-    
-    #-----------------------------------MODEL TESTED -> Val_loss can't go under 0.2
     #Encoder.
     concat = Concatenate()([input_data, input_params])
 
     hidden = Dense(300,activation='relu')(concat)
 
     hidden = Dense(200,activation='relu')(hidden)
-    #hidden = Dropout(0.2)(hidden)
 
     hidden = Dense(100,activation='relu')(hidden)
 
-    #hidden = BatchNormalization()(hidden)
+    hidden = BatchNormalization()(hidden)
 
     code=Dense(5,activation='sigmoid')(hidden) #Encoded.
 
@@ -220,87 +239,26 @@ if __name__ == "__main__":
 
     hidden = Dense(100,activation='relu')(concat)
 
+
     hidden = Dense(200,activation='relu')(hidden)
-    #hidden = Dropout(0.2)(hidden)
 
-    hidden = Dense(300,activation='relu')(hidden)
+    hidden = Dense(300, activation='relu')(hidden)
 
     
     #Output.
     outputs = Dense(15, activation='linear')(hidden)
     
-    '''
-    --------------------------------------MODEL TESTED -> not better than the last
-      #Encoder.
-    #hidden1 = Dense(50,activation='relu')(input_data)
-    #hidden2 = Dense(50,activation='relu')(input_params)
-    concat = Concatenate()([input_data, input_params])
-
-    hidden = Dense(150,activation='relu')(concat)
-
-    hidden = Dense(100,activation='relu')(hidden)
-
-    hidden = Dense(50,activation='relu')(hidden)
-
-    hidden = BatchNormalization()(hidden)
-
-    code=Dense(5,activation='sigmoid')(hidden) #Encoded.
-
-    #Decoder.
-    #concat = Concatenate()([code, input_params])
-
-    hidden = Dense(50,activation='relu')(code)
-
-    hidden = Dense(100,activation='relu')(hidden)
-
-    hidden = Dense(150,activation='relu')(hidden)
-
-    concat = Concatenate()([hidden, input_params])
-
-    #Output.
-    outputs = Dense(15, activation='linear')(concat)
-    '''
-    '''
-    #Encoder.
-    #hidden = Dense(25, activation='relu')(input_data)
-    #hidden1 = Dense(25, activation='relu')(input_params)
-    concat = Concatenate()([input_data, input_params])
-
-    hidden = Dense(150,activation='relu')(concat)
-
-    #hidden = Dense(100,activation='relu')(hidden)
-
-    hidden = Dense(50,activation='relu')(hidden)
-
-    hidden = BatchNormalization()(hidden)
-
-    code=Dense(5,activation='sigmoid')(hidden) #Encoded.
-
-    #Decoder.
-    #hidden1 = Dense(25, activation='relu')(input_params)
-    concat = Concatenate()([code, input_params])
-
-    hidden = Dense(50,activation='relu')(concat)
-
-    #hidden = Dense(100,activation='relu')(hidden)
-
-    hidden = Dense(150,activation='relu')(hidden)
-    hidden = Dropout(0.2)(hidden)
-
-    #Output.
-    outputs = Dense(15, activation='linear')(hidden)
-    '''
 
     model = Model(inputs=[input_data, input_params], outputs=outputs)
-    model.compile(loss='MSE', optimizer='adam')
+    model.compile(loss='MSE', optimizer='adam', metrics=[my_metric, my_metric2, my_metric3])
     model.summary()
-    tf.keras.utils.plot_model(model, "/mnt/c/Users/HP/Desktop/history/model2_norm4.png",show_shapes=True)
+    tf.keras.utils.plot_model(model, "/mnt/c/Users/HP/Desktop/history/model_enc5_2.png",show_shapes=True)
     
     
     #Dictionary for training settings
     dt = {
         "validation_split" : 0.5,
-        "epochs" : 500,
+        "epochs" : 1000,
         "batch_size" : 200,
         #Early stopping settings.
         "EarlyStopping_monitor" : "val_loss",
@@ -319,6 +277,7 @@ if __name__ == "__main__":
     print(f'len/batch_size = {cov_train.shape[0]//dt["batch_size"]}')
 
     input("Press a button to start training")
+    
     gen = generator(cov_train,par_train,dt['batch_size'])
     print(type(gen))
     history = model.fit(
@@ -331,71 +290,72 @@ if __name__ == "__main__":
         callbacks = [EarlyStopping(monitor=dt["EarlyStopping_monitor"], patience=dt["EarlyStopping_patience"], verbose=1),
                      ReduceLROnPlateau(monitor=dt["ReduceLROnPlateau_monitor"], factor=dt["ReduceLROnPlateau_factor"],
                                        patience=dt["ReduceLROnPlateau_patience"], verbose=1)])
-
+    
+    #history = model.fit([cov_train, par_train], cov_train, validation_split=0.5, epochs=2, verbose=1, batch_size=128)
     ##Plot loss.
     plot_loss(history.history['loss'], history.history['val_loss'])
-    plt.savefig('/mnt/c/Users/HP/Desktop/history/loss_model2_norm4.png')
+    plt.savefig('/mnt/c/Users/HP/Desktop/history/loss_model_enc5_2.png')
+    plt.show()
+    
+    plt.figure(12)
+    plt.plot(history.history['my_metric'], label='my_metric')
+    plt.plot(history.history['val_my_metric'], label='val_my_metric')
+    plt.xlabel('Epochs', size=12)
+    plt.xticks(size=12)
+    plt.ylabel('Metrics', size=12)
+    plt.yticks(size=12)
+    plt.grid()
+    plt.legend(loc='best', fontsize=12)
+    plt.title('My metric', size=15)
+    plt.show()
+
+    plt.figure(13)
+    plt.plot(history.history['my_metric2'], label='my_metric2')
+    plt.plot(history.history['val_my_metric2'], label='val_my_metric2')
+    plt.xlabel('Epochs', size=12)
+    plt.xticks(size=12)
+    plt.ylabel('Metrics', size=12)
+    plt.yticks(size=12)
+    plt.grid()
+    plt.legend(loc='best', fontsize=12)
+    plt.title('My metric2', size=15)
     plt.show()
 
     input("Press a button to save history")
-    with open('/mnt/c/Users/HP/Desktop/history/history_model2_norm4', 'wb') as file_pi:
+    with open('/mnt/c/Users/HP/Desktop/history/history_model_enc5_2', 'wb') as file_pi:
         pickle.dump(history.history, file_pi)
+
     input("Press a button to continue")
-
-    '''
-    ##Save instance in log.
-    inp = input("Press 'y' if you want to save this instance.")
-    if inp == "y":
-        description = input("Insert a description for this instance:")
-        inst = Log(description, model, dt, elapsed_time, history.history['loss'], history.history['val_loss'])
-        save_instance("log", inst)
-        print("Instance saved.")
-    else: print("Instance not saved.")
-
-    with open("log", 'rb') as inst_file:
-        arr = pickle.load(inst_file)
-    print_log(arr)
 
     ##Encoder-decoder division.
     encoder = Model(inputs=[input_data, input_params], outputs=code)
     decoder = Model(inputs=[code, input_params] , outputs=outputs)
-    print("Prediction of ")
-    encoded_cov = encoder.predict([cov_test[0:2, :], par_test[0:2, :]])
-    print(encoded_cov)
-    print(f'nbytes encoded matrix: {encoded_cov.nbytes}')
-    print(f'nbytes original matrix: {cov_test[0:2,:].nbytes}')
+    print("Encoder predictions")
+    cov_enc = encoder.predict(predict_generator(cov_test,par_test,dt['batch_size']),
+                             steps = cov_test.shape[0]//dt['batch_size']+1,
+                             verbose = 1)
+    
+    np.save('/mnt/c/Users/HP/Desktop/cov_enc_enc5_2.npy',cov_enc)
 
     input("Press a button to continue")
-    '''
+   
 
     ##Test
-    #cov_test, A, par_test, B = train_test_split(cov_test, par_test, test_size=0.95, random_state=42)
     
-    #test_data = cov_test[0:1*10**6, :]
-    #test_params = par_test[0:1*10**6, :]
-    #cov_pred = model.predict([cov_test, par_test])
+    print(f'cov_test shape = {cov_test.shape}')
+    print(f'batch_size = 1')
+    #cov_pred = model.predict([cov_test, par_test],batch_size=1)
+    
     cov_pred = model.predict(predict_generator(cov_test,par_test,dt['batch_size']),
                              steps = cov_test.shape[0]//dt['batch_size']+1,
                              verbose = 1)
-    print('save?')
-    np.save('/mnt/c/Users/HP/Desktop/cov_pred3.npy',cov_pred)
-    print('saved')
-    np.save('/mnt/c/Users/HP/Desktop/cov_test3.npy',cov_test)
+    
+
+    np.save('/mnt/c/Users/HP/Desktop/cov_pred_enc5_2.npy',cov_pred)
+
+    np.save('/mnt/c/Users/HP/Desktop/cov_test_enc5_2.npy',cov_test)
 
     print(cov_test.shape)
     print(cov_pred.shape)
     
-    index = [0, 5, 9, 12, 14]
-    titles = ['qoverp', 'lambda', 'phi', 'dxy', 'dsz']
-    # Da applicare taglio
-    for i, elem in enumerate(index):
-        print(f'i = {elem}')
-        #Calculate residuals.
-        res = (cov_test[:, elem] - cov_pred[:, elem])/cov_test[:, elem]
-        #x = res[res < np.percentile(res, 95)]
-        #Plot histogram.
-        #hist_res(res, n_bins=int(np.max(res)-np.min(res)), title = titles[i], y_label='N', x_label = 'Norm. res.')
-        hist_res(res[(res<10) & (res>-10)], n_bins=80, title = titles[i], y_label='N', x_label = 'Norm. res.')
-        plt.show()
-        
-
+    
