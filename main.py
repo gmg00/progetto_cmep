@@ -4,7 +4,7 @@ import numpy as np
 import pickle
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
-from keras.layers import Dense, Input, Dropout, BatchNormalization, Concatenate
+from keras.layers import Dense, Input, Dropout, BatchNormalization, Activation, Concatenate
 from keras.models import Model
 from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from keras.regularizers import l1
@@ -54,7 +54,6 @@ def plot_loss(loss, val_loss):
     plt.legend(loc='best', fontsize=12)
     plt.title('Loss vs Validation Loss', size=15)
     
-
 class Log:
     def __init__(self, description, model, train_settings, training_time, loss, val_loss):
         self.description = description
@@ -116,7 +115,6 @@ def generator(X1_data, X2_data, batch_size):
         #restart counter to yeild data in the next epoch as well
         if counter >= number_of_batches:
             counter = 0
-
 
 def predict_generator(X1_data, X2_data, batch_size):
     counter=0
@@ -230,15 +228,16 @@ if __name__ == "__main__":
 
     hidden = Dense(100,activation='relu')(hidden)
 
-    hidden = BatchNormalization()(hidden)
+    #hidden = BatchNormalization()(hidden)
 
-    code=Dense(5,activation='sigmoid')(hidden) #Encoded.
+    code=Dense(8,activation='sigmoid')(hidden) #Encoded.
+
+    encodedstate = Activation('linear',dtype='float16')(code)
 
     #Decoder.
-    concat = Concatenate()([code, input_params])
+    concat = Concatenate()([encodedstate, input_params])
 
     hidden = Dense(100,activation='relu')(concat)
-
 
     hidden = Dense(200,activation='relu')(hidden)
 
@@ -252,7 +251,7 @@ if __name__ == "__main__":
     model = Model(inputs=[input_data, input_params], outputs=outputs)
     model.compile(loss='MSE', optimizer='adam', metrics=[my_metric, my_metric2, my_metric3])
     model.summary()
-    tf.keras.utils.plot_model(model, "/mnt/c/Users/HP/Desktop/history/model_enc5_2.png",show_shapes=True)
+    tf.keras.utils.plot_model(model, "/mnt/c/Users/HP/Desktop/history/model_enc8.png",show_shapes=True)
     
     
     #Dictionary for training settings
@@ -262,7 +261,7 @@ if __name__ == "__main__":
         "batch_size" : 200,
         #Early stopping settings.
         "EarlyStopping_monitor" : "val_loss",
-        "EarlyStopping_patience" : 150,
+        "EarlyStopping_patience" : 90,
         #Reduce learning rate on plateau settings.
         "ReduceLROnPlateau_monitor" : "val_loss",
         "ReduceLROnPlateau_factor" : 0.25,
@@ -294,7 +293,7 @@ if __name__ == "__main__":
     #history = model.fit([cov_train, par_train], cov_train, validation_split=0.5, epochs=2, verbose=1, batch_size=128)
     ##Plot loss.
     plot_loss(history.history['loss'], history.history['val_loss'])
-    plt.savefig('/mnt/c/Users/HP/Desktop/history/loss_model_enc5_2.png')
+    plt.savefig('/mnt/c/Users/HP/Desktop/history/loss_model_enc8.png')
     plt.show()
     
     plt.figure(12)
@@ -322,20 +321,20 @@ if __name__ == "__main__":
     plt.show()
 
     input("Press a button to save history")
-    with open('/mnt/c/Users/HP/Desktop/history/history_model_enc5_2', 'wb') as file_pi:
+    with open('/mnt/c/Users/HP/Desktop/history/history_model_enc8', 'wb') as file_pi:
         pickle.dump(history.history, file_pi)
 
     input("Press a button to continue")
 
     ##Encoder-decoder division.
-    encoder = Model(inputs=[input_data, input_params], outputs=code)
-    decoder = Model(inputs=[code, input_params] , outputs=outputs)
+    encoder = Model(inputs=[input_data, input_params], outputs=encodedstate)
+    decoder = Model(inputs=[encodedstate, input_params] , outputs=outputs)
     print("Encoder predictions")
     cov_enc = encoder.predict(predict_generator(cov_test,par_test,dt['batch_size']),
                              steps = cov_test.shape[0]//dt['batch_size']+1,
                              verbose = 1)
     
-    np.save('/mnt/c/Users/HP/Desktop/cov_enc_enc5_2.npy',cov_enc)
+    np.save('/mnt/c/Users/HP/Desktop/cov_enc_enc7.npy',cov_enc)
 
     input("Press a button to continue")
    
@@ -343,7 +342,6 @@ if __name__ == "__main__":
     ##Test
     
     print(f'cov_test shape = {cov_test.shape}')
-    print(f'batch_size = 1')
     #cov_pred = model.predict([cov_test, par_test],batch_size=1)
     
     cov_pred = model.predict(predict_generator(cov_test,par_test,dt['batch_size']),
@@ -351,9 +349,9 @@ if __name__ == "__main__":
                              verbose = 1)
     
 
-    np.save('/mnt/c/Users/HP/Desktop/cov_pred_enc5_2.npy',cov_pred)
+    np.save('/mnt/c/Users/HP/Desktop/cov_pred_enc8.npy',cov_pred)
 
-    np.save('/mnt/c/Users/HP/Desktop/cov_test_enc5_2.npy',cov_test)
+    np.save('/mnt/c/Users/HP/Desktop/cov_test_enc8.npy',cov_test)
 
     print(cov_test.shape)
     print(cov_pred.shape)
