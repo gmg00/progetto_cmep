@@ -162,15 +162,18 @@ def my_metric3(y_true, y_pred):
 #---------------------------------------------------------------------MAIN
 if __name__ == "__main__":
 
+    dir_name = '/mnt/c/Users/HP/Desktop/progetto_cmep'
+    model_name = 'enc8'
+
     #Get covariance matrix.
-    filename = '/mnt/c/Users/HP/Desktop/cov_tot.npy'
+    filename = dir_name + '/data/inputs/cov_tot.npy'
     cov = get_file(filename)
 
     print(f'Dataset size: {cov.size}')
     print(f'Dataset shape: {cov.shape}')
 
     #Get parameters for conditioning.
-    filename = '/mnt/c/Users/HP/Desktop/par_tot.npy'
+    filename = dir_name + '/data/inputs/par_tot.npy'
     par = get_file(filename)
 
     print(f'Dataset size: {par.size}')
@@ -210,7 +213,7 @@ if __name__ == "__main__":
         #if i%10000 == 0:
             #print(i)
 
-    np.save('/mnt/c/Users/HP/Desktop/scal.npy',np.array(scal))
+    np.save(dir_name + '/data/outputs/scal.npy', np.array(scal))
     
 
     ##Create an autoencoder model.
@@ -251,7 +254,7 @@ if __name__ == "__main__":
     model = Model(inputs=[input_data, input_params], outputs=outputs)
     model.compile(loss='MSE', optimizer='adam', metrics=[my_metric, my_metric2, my_metric3])
     model.summary()
-    tf.keras.utils.plot_model(model, "/mnt/c/Users/HP/Desktop/history/model_enc8.png",show_shapes=True)
+    #tf.keras.utils.plot_model(model, "/mnt/c/Users/HP/Desktop/history/model_enc8.png",show_shapes=True)
     
     
     #Dictionary for training settings
@@ -261,11 +264,11 @@ if __name__ == "__main__":
         "batch_size" : 200,
         #Early stopping settings.
         "EarlyStopping_monitor" : "val_loss",
-        "EarlyStopping_patience" : 90,
+        "EarlyStopping_patience" : 65,
         #Reduce learning rate on plateau settings.
         "ReduceLROnPlateau_monitor" : "val_loss",
         "ReduceLROnPlateau_factor" : 0.25,
-        "ReduceLROnPlateau_patience" : 50
+        "ReduceLROnPlateau_patience" : 30
         }
 
     ##Training.
@@ -293,7 +296,7 @@ if __name__ == "__main__":
     #history = model.fit([cov_train, par_train], cov_train, validation_split=0.5, epochs=2, verbose=1, batch_size=128)
     ##Plot loss.
     plot_loss(history.history['loss'], history.history['val_loss'])
-    plt.savefig('/mnt/c/Users/HP/Desktop/history/loss_model_enc8.png')
+    plt.savefig(dir_name + '/data/models/loss_model_enc8.png')
     plt.show()
     
     plt.figure(12)
@@ -321,7 +324,7 @@ if __name__ == "__main__":
     plt.show()
 
     input("Press a button to save history")
-    with open('/mnt/c/Users/HP/Desktop/history/history_model_enc8', 'wb') as file_pi:
+    with open(dir_name + '/data/histories/history_' + model_name, 'wb') as file_pi:
         pickle.dump(history.history, file_pi)
 
     input("Press a button to continue")
@@ -334,7 +337,7 @@ if __name__ == "__main__":
                              steps = cov_test.shape[0]//dt['batch_size']+1,
                              verbose = 1)
     
-    np.save('/mnt/c/Users/HP/Desktop/cov_enc_enc7.npy',cov_enc)
+    np.save(dir_name + '/data/outputs/cov_enc_' + model_name + '.npy', cov_enc)
 
     input("Press a button to continue")
    
@@ -349,9 +352,9 @@ if __name__ == "__main__":
                              verbose = 1)
     
 
-    np.save('/mnt/c/Users/HP/Desktop/cov_pred_enc8.npy',cov_pred)
+    np.save(dir_name + '/data/outputs/cov_pred_' + model_name + '.npy', cov_pred)
 
-    np.save('/mnt/c/Users/HP/Desktop/cov_test_enc8.npy',cov_test)
+    np.save(dir_name + '/data/outputs/cov_test_' + model_name + '.npy', cov_test)
 
     print(cov_test.shape)
     print(cov_pred.shape)
