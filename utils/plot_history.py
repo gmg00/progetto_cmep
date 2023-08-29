@@ -20,7 +20,7 @@ def plot_history(histories, filenames):
     '''
     plt.figure(1)
     i = 0
-    colors = ['b','g','r','c','m','y','k','w']
+    colors = ['b','g','r','c','m','y','k','darkgreen','midnightblue','maroon','gold']
     for history in histories:
         plt.plot(history['loss'], label=filenames[i],color = colors[i])
         plt.plot(history['val_loss'],'--',color = colors[i])
@@ -53,8 +53,8 @@ if __name__ == "__main__":
     plot_hist = True
     plot_metrics = True
 
-    directory = '/mnt/c/Users/HP/Desktop/history/'
-    filenames = ['history_model_enc6', 'history_model_enc5_4']
+    directory = '/mnt/c/Users/HP/Desktop/progetto_cmep/data/histories/'
+    filenames = ['history_enc5', 'history_enc6','history_enc7','history_enc8','history_enc9','history_enc10', 'history_enc11','history_enc12','history_enc13','history_enc14','history_enc15']
     filenamesdir = []
 
     for i in range(len(filenames)):
@@ -86,7 +86,7 @@ if __name__ == "__main__":
 
         plt.figure(2)
         i = 0
-        colors = ['b','g','r','c','m','y','k','w']
+        colors = ['b','g','r','c','m','y','k','darkgreen','midnightblue','maroon','gold']
         for i in range(len(m)):
             #print(history)
             plt.plot(m_smooth[i], label=filenames[i],color = colors[i])
@@ -120,7 +120,7 @@ if __name__ == "__main__":
 
         plt.figure(3)
         i = 0
-        colors = ['b','g','r','c','m','y','k','w']
+        colors = ['b','g','r','c','m','y','k','darkgreen','midnightblue','maroon','gold']
         for history in histories:
             plt.plot(m_smooth[i], label=filenames[i],color = colors[i])
             plt.plot(val_m_smooth[i],'--',color = colors[i])
