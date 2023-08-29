@@ -54,45 +54,6 @@ def plot_loss(loss, val_loss):
     plt.legend(loc='best', fontsize=12)
     plt.title('Loss vs Validation Loss', size=15)
     
-class Log:
-    def __init__(self, description, model, train_settings, training_time, loss, val_loss):
-        self.description = description
-        self.model = model
-        self.train_settings = train_settings
-        self.training_time = training_time 
-        self.loss = loss
-        self.val_loss = val_loss
-
-def print_log(obj, only_last = False):
-    print(f'There are {len(obj)} objects.')
-    i = 0
-    for o in obj:
-        print(f'Object n. {i}----------------------------------------')
-        print(o.description)
-        print('Model summary:')
-        o.model.summary()
-        print(o.train_settings)
-        print(f'Final loss: {o.loss}')
-        print(f'Final val_loss: {o.val_loss}')
-        plot_loss(o.loss,o.val_loss)
-        print(f'Training time: {o.training_time}')
-        print(f'End object n. {i}------------------------------------')
-
-def save_instance(filename, inst):
-    try:
-        if not os.path.exists(filename):
-            arr = []
-            arr.append(inst)
-            with open(filename, 'xb') as inst_file:
-                pickle.dump(arr, inst_file)
-        else:
-            with open(filename, 'rb') as inst_file:
-                arr = pickle.load(inst_file)
-            arr.append(inst)
-            with open(filename, 'wb') as inst_file:
-                pickle.dump(arr, inst_file)
-    except: print("Error in save_instance.")
-
 def generator(X1_data, X2_data, batch_size):
 
     samples_per_epoch = X1_data.shape[0]
@@ -108,7 +69,7 @@ def generator(X1_data, X2_data, batch_size):
             X2_data = X2_data[ids]
         X1_batch = np.array(X1_data[batch_size*counter:batch_size*(counter+1)]).astype('float32')
         X2_batch = np.array(X2_data[batch_size*counter:batch_size*(counter+1)]).astype('float32')
-        #np.random.shuffle(X2_batch) #!!!!!!!!!!!!
+        
         counter += 1
         yield [X1_batch,X2_batch],X1_batch
 
@@ -124,7 +85,7 @@ def predict_generator(X1_data, X2_data, batch_size):
         X1_batch = np.array(X1_data[batch_size*counter:batch_size*(counter+1)]).astype('float32')
         X2_batch = np.array(X2_data[batch_size*counter:batch_size*(counter+1)]).astype('float32')
         counter += 1
-        yield [X1_batch, X2_batch],1
+        yield [X1_batch, X2_batch],
 
 def my_metric(y_true, y_pred):
     '''Computes loss = mean(sqrt(y_true - y_pred)**2 / y_true), axis=-1)
@@ -149,7 +110,7 @@ def my_metric2(y_true, y_pred):
 def my_metric3(y_true, y_pred):
     '''Computes loss = mean(abs((y_true - y_pred) / y_true)), axis=-1)
     '''
-    epsilon = 10**(-4)
+    epsilon = 10**(-5)
     index = [0,5,9,12,14]
     y_true = tf.gather(y_true, indices=index)
     y_pred = tf.gather(y_pred, indices=index)
@@ -163,37 +124,25 @@ def my_metric3(y_true, y_pred):
 if __name__ == "__main__":
 
     dir_name = '/mnt/c/Users/HP/Desktop/progetto_cmep'
-    model_name = 'enc8'
+    model_name = 'enc15'
 
     #Get covariance matrix.
-    filename = dir_name + '/data/inputs/cov_tot.npy'
+    filename = f'{dir_name}/data/inputs/cov_tot.npy'
     cov = get_file(filename)
 
     print(f'Dataset size: {cov.size}')
     print(f'Dataset shape: {cov.shape}')
 
     #Get parameters for conditioning.
-    filename = dir_name + '/data/inputs/par_tot.npy'
+    filename = f'{dir_name}/data/inputs/par_tot.npy'
     par = get_file(filename)
 
     print(f'Dataset size: {par.size}')
     print(f'Dataset shape: {par.shape}')
 
     #Normalize dataset
-    #cov = cov/np.max(cov)
-    #par = par/np.max(par)
-    #Standardize dataset
     scaler_cov = preprocessing.Normalizer().fit(cov)
     scaler_par = preprocessing.Normalizer().fit(par)
-
-    #cov = scaler_cov.transform(cov)
-    #par = scaler_par.transform(par)
-
-    print('Mean of each column in matric covariance dataset:')
-    print(cov.mean(axis=0))
-
-    print('Standard deviation of each column in matric covariance dataset:')
-    print(cov.std(axis=0))
 
     #Split dataset in training and test
     cov_train0, cov_test0, par_train0, par_test0 = train_test_split(cov, par, test_size=0.5, random_state=42)
@@ -206,16 +155,14 @@ if __name__ == "__main__":
     par_test = scaler_par.transform(par_test0)
 
 
-    #Get normalization factors for every row.
+    #Get normalization factors for every row of test dataset.
     scal = []
     for i in range(cov_test.shape[0]):
         scal.append(cov_test0[i,0]/cov_test[i,0])
-        #if i%10000 == 0:
-            #print(i)
 
-    np.save(dir_name + '/data/outputs/scal.npy', np.array(scal))
+    #np.save(dir_name + '/data/outputs/scal.npy', np.array(scal))
+    np.save(f'{dir_name}/data/outputs/scal.npy', np.array(scal))
     
-
     ##Create an autoencoder model.
     #Input data.
     input_data = Input(shape=(15,))  
@@ -233,7 +180,7 @@ if __name__ == "__main__":
 
     #hidden = BatchNormalization()(hidden)
 
-    code=Dense(8,activation='sigmoid')(hidden) #Encoded.
+    code=Dense(15,activation='sigmoid')(hidden) #Encoded.
 
     encodedstate = Activation('linear',dtype='float16')(code)
 
@@ -254,10 +201,11 @@ if __name__ == "__main__":
     model = Model(inputs=[input_data, input_params], outputs=outputs)
     model.compile(loss='MSE', optimizer='adam', metrics=[my_metric, my_metric2, my_metric3])
     model.summary()
-    #tf.keras.utils.plot_model(model, "/mnt/c/Users/HP/Desktop/history/model_enc8.png",show_shapes=True)
+    #tf.keras.utils.plot_model(model, dir_name + "/data/models/model_" + model_name +".png",show_shapes=True)
+    tf.keras.utils.plot_model(model, f"{dir_name}/data/models/model_{model_name}.png", show_shapes=True)
     
     
-    #Dictionary for training settings
+    #Dictionary of training settings
     dt = {
         "validation_split" : 0.5,
         "epochs" : 1000,
@@ -276,12 +224,12 @@ if __name__ == "__main__":
     #Split cov_train and par_train in train and validation datasets.
     cov_train, cov_val, par_train, par_val = train_test_split(cov_train, par_train, test_size=0.5, random_state=42)
 
-    print(f'len/batch_size = {cov_train.shape[0]//dt["batch_size"]}')
+    print(f'len/batch_size = {cov_train.shape[0] // dt["batch_size"]}')
 
     input("Press a button to start training")
     
-    gen = generator(cov_train,par_train,dt['batch_size'])
-    print(type(gen))
+    gen = generator(cov_train, par_train, dt['batch_size'])
+
     history = model.fit(
         gen,
         epochs=dt['epochs'],
@@ -296,7 +244,7 @@ if __name__ == "__main__":
     #history = model.fit([cov_train, par_train], cov_train, validation_split=0.5, epochs=2, verbose=1, batch_size=128)
     ##Plot loss.
     plot_loss(history.history['loss'], history.history['val_loss'])
-    plt.savefig(dir_name + '/data/models/loss_model_enc8.png')
+    #plt.savefig(dir_name + '/data/models/loss_' + model_name +'.png')
     plt.show()
     
     plt.figure(12)
@@ -333,6 +281,7 @@ if __name__ == "__main__":
     encoder = Model(inputs=[input_data, input_params], outputs=encodedstate)
     decoder = Model(inputs=[encodedstate, input_params] , outputs=outputs)
     print("Encoder predictions")
+    #cov_enc = encoder.predict([cov_test, par_test],batch_size=1)
     cov_enc = encoder.predict(predict_generator(cov_test,par_test,dt['batch_size']),
                              steps = cov_test.shape[0]//dt['batch_size']+1,
                              verbose = 1)
