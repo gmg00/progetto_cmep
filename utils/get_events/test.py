@@ -1,4 +1,4 @@
-import sys
+"""This module is used to test if get_cov.py and get_par.py work correctly."""
 import gc
 import numpy as np
 from DataFormats.FWLite import Events, Handle

@@ -17,7 +17,8 @@
     <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="progetto_cmep" href="modules.html" />
+    <link rel="next" title="utils package" href="utils.html" />
+    <link rel="prev" title="Progetto CMEP" href="modules.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -36,55 +37,168 @@
             
   <section id="module-main">
 <span id="main-module"></span><h1>main module<a class="headerlink" href="#module-main" title="Permalink to this heading">¶</a></h1>
+<p>Autoencoder for covariance matrix using 5 parameters as conditioning.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="main.generator">
 <span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X1_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X2_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.generator" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Create a generator for model training. Training dataset is [covariance matrix, parameters] 
+and target is [covariance matrix].</p>
+<dl>
+<dt>Args:</dt><dd><p>X1_data: train dataset composed by the 15 significative elements of covariance matrix. X1_data
+is also the target.</p>
+<p>X2_data: 5 parameters used for conditioning during training.</p>
+<p>batch_size: integer. Number of samples per gradient update.</p>
+</dd>
+<dt>Yields:</dt><dd><p>[X1_batch,X2_batch], X1_batch: inputs batch of size = batch_size and target batch of size = batch_size.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="main.get_file">
 <span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">get_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#get_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.get_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get matrix from file ‘filename’.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>filename (string): name of the file containing the matrix.</p>
+</dd>
+<dt>Returns:</dt><dd><p>cov (numpy.ndarray): array of the 15 significative elements of covariance matrix.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="main.hist_res">
 <span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">hist_res</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">res</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Residuals</span> <span class="pre">distribution'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'x</span> <span class="pre">label'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Residuals'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#hist_res"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.hist_res" title="Permalink to this definition">¶</a></dt>
 <dd><p>Take residuals and plot histogram.</p>
+<dl>
+<dt>Args:</dt><dd><p>res: residuals array.</p>
+<p>n_bins: number of bins. Deafault = 50.</p>
+<p>title: title of histogram. Default = ‘Residuals distribution’</p>
+<p>x_label: label of x axis. Default = ‘x label’</p>
+<p>y_label: label of y axis. Default = ‘Residuals’</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main.main">
+<span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dir_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main function. Create a model, fit that model and save the results.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>dir_name: name of directory in which is contained input datasets.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="main.my_metric">
 <span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">my_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#my_metric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.my_metric" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes loss = mean(sqrt(y_true - y_pred)**2 / y_true), axis=-1)</p>
+<dd><p>Compute loss = mean(sqrt(y_true - y_pred)**2 / y_true**2), axis=-1) only on diagonal elements.</p>
+<dl>
+<dt>Args:</dt><dd><p>y_true: array of true values.</p>
+<p>y_pred: array of predicted values.</p>
+</dd>
+<dt>Returns:</dt><dd><p>metric: tensorflow.tensor. Mean quadratic relative error metric on diagonal elements.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="main.my_metric2">
 <span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">my_metric2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#my_metric2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.my_metric2" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes loss = mean(abs((y_true - y_pred) / y_true)), axis=-1)</p>
+<dd><p>Compute loss = mean(abs((y_true - y_pred) / y_true)), axis=-1)</p>
+<dl>
+<dt>Args:</dt><dd><p>y_true: array of true values.</p>
+<p>y_pred: array of predicted values.</p>
+</dd>
+<dt>Returns:</dt><dd><p>metric: tensorflow.tensor. Mean absolute relative error metric.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="main.my_metric3">
-<span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">my_metric3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#my_metric3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.my_metric3" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes loss = mean(abs((y_true - y_pred) / y_true)), axis=-1)</p>
+<span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">my_metric3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y_true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#my_metric3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.my_metric3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute loss = mean(abs((y_true - y_pred) / (y_true + epsilon))), axis=-1) only on diagonal elements.</p>
+<dl>
+<dt>Args:</dt><dd><p>y_true: array of true values.</p>
+<p>y_pred: array of predicted values.</p>
+<p>epsilon: float. Parameter used to avoid division by a number close to 0.</p>
+</dd>
+<dt>Returns:</dt><dd><p>metric: tensorflow.tensor. Mean absolute relative error metric on diagonal elements.</p>
+</dd>
+</dl>
 </dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main.my_model">
+<span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">my_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">encoding_dim</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#my_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.my_model" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="main.plot_loss">
 <span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">plot_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_loss</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#plot_loss"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.plot_loss" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Plot loss functions.</p>
+<dl>
+<dt>Args:</dt><dd><p>loss: points of loss function.</p>
+<p>val_loss: points of validation loss function.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main.plot_metrics">
+<span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">plot_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_metric</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Metric</span> <span class="pre">functions'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#plot_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.plot_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot metric functions.</p>
+<dl>
+<dt>Args:</dt><dd><p>metric: points of metric function.</p>
+<p>val_metric: points of validation metric function.</p>
+<p>title: string. Title of figure. Default = ‘Metric functions’</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="main.predict_generator">
 <span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">predict_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X1_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X2_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#predict_generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.predict_generator" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Create a generator for model.predict() function. Test dataset is [covariance matrix, parameters].</p>
+<dl>
+<dt>Args:</dt><dd><p>X1_data: test dataset composed by the 15 significative elements of covariance matrix.</p>
+<p>X2_data: 5 parameters used for conditioning.</p>
+<p>batch_size: integer. Number of samples per gradient update.</p>
+</dd>
+<dt>Yields:</dt><dd><p>[X1_batch,X2_batch]: inputs batch of size = batch_size.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="main.preprocessing_dataset">
+<span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">preprocessing_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cov</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">par</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_scal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">42</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dir_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#preprocessing_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.preprocessing_dataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalize datasets and split them in training and test datasets.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>cov: matrix containing 15 significative elements of covariance matrix.
+par: matrix containing 5 conditioning parameters.
+save_scal: Boolean. If True create an array with scaling factors and save it.
+Default = False.
+random_state: random_state for train_test_split function. Default = 42.</p>
+</dd>
+<dt>Returns:</dt><dd><p>cov_train: training dataset containing covariance matrix elements.
+cov_test: test dataset containing covariance matrix elements.
+par_train: training dataset containing conditioning parameters.
+par_test: test dataset containing conditioning parameters.</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="main.print_cov">
 <span class="sig-prename descclassname"><span class="pre">main.</span></span><span class="sig-name descname"><span class="pre">print_cov</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cov</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/main.html#print_cov"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#main.print_cov" title="Permalink to this definition">¶</a></dt>
 <dd><p>Print covariance matrix from the array of 15 values.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>cov (nupmy.ndarray): array of the 15 significative elements of covariance matrix.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -108,8 +222,9 @@
 <h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">progetto_cmep</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Progetto CMEP</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">main module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utils.html">utils package</a></li>
 </ul>
 </li>
 </ul>
@@ -118,8 +233,9 @@
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-  <li><a href="modules.html">progetto_cmep</a><ul>
-      <li>Previous: <a href="modules.html" title="previous chapter">progetto_cmep</a></li>
+  <li><a href="modules.html">Progetto CMEP</a><ul>
+      <li>Previous: <a href="modules.html" title="previous chapter">Progetto CMEP</a></li>
+      <li>Next: <a href="utils.html" title="next chapter">utils package</a></li>
   </ul></li>
   </ul></li>
 </ul>
