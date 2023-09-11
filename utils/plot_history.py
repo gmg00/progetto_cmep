@@ -102,14 +102,16 @@ if __name__ == "__main__":
     np.random.seed(123)
 
     directory = '/mnt/c/Users/HP/Desktop/progetto_cmep/data/histories/'
-    filenames = ['history_enc5_bs40','history_enc5_bs80','history_enc5_bs100', 'history_enc5', 'history_enc5_bs300','history_enc5_bs400']
+    filenames = ['history_enc5_bs40','history_enc5_bs80','history_enc5_bs100',
+                 'history_enc5', 'history_enc5_bs300','history_enc5_bs400']
     filenamesdir = []
-    names = ['batch_size = 40', 'batch_size = 80', 'batch_size = 100', 'batch_size = 200', 'batch_size = 300', 'batch_size = 400']
+    names = ['batch_size = 40', 'batch_size = 80', 'batch_size = 100',
+             'batch_size = 200', 'batch_size = 300', 'batch_size = 400']
 
     for i in range(len(filenames)):
         filenamesdir.append(directory + filenames[i])
     histories = import_histories(filenamesdir)
-    
+
     plot_history(histories, names)
     plot_metric(histories, 'my_metric2', 30, names)
 

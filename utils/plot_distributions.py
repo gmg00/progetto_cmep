@@ -142,7 +142,7 @@ def element_error(path, enc):
     plt.xlabel('Element', size=15)
     plt.ylabel('MRAE', size=15)
 
-def element_error_tot(path, enc_lim=(3,15)):
+def element_error_tot(path, enc_lim=(5,15)):
     """Produce graphs about MRAE and MAE of every element mediated on every test with encoding space
     from enc_lim[0] to enc_lim[1].
 
@@ -275,11 +275,11 @@ if __name__ == "__main__":
     # Fixing random state for reproducibility
     np.random.seed(123)
 
-    matrix_error_graph('/mnt/c/Users/HP/Desktop/progetto_cmep/data/outputs/')
-    element_error('/mnt/c/Users/HP/Desktop/progetto_cmep/data/outputs/', 15)
+    #matrix_error_graph('/mnt/c/Users/HP/Desktop/progetto_cmep/data/outputs/')
+    #element_error('/mnt/c/Users/HP/Desktop/progetto_cmep/data/outputs/', 15)
     element_error_tot('/mnt/c/Users/HP/Desktop/progetto_cmep/data/outputs/')
-    matrix_error_graph_bs('/mnt/c/Users/HP/Desktop/progetto_cmep/data/outputs/',
-                          ['5_bs40','5_bs80','5_bs100', '5', '5_bs300','5_bs400'])
-    print_mean_std('/mnt/c/Users/HP/Desktop/progetto_cmep/data/inputs/cov_tot.npy')
+    #matrix_error_graph_bs('/mnt/c/Users/HP/Desktop/progetto_cmep/data/outputs/',
+    #                      ['5_bs40','5_bs80','5_bs100', '5', '5_bs300','5_bs400'])
+    #print_mean_std('/mnt/c/Users/HP/Desktop/progetto_cmep/data/inputs/cov_tot.npy')
 
     plt.show()

@@ -42,8 +42,8 @@
 <section id="module-utils.plot_distributions">
 <span id="utils-plot-distributions-module"></span><h2>utils.plot_distributions module<a class="headerlink" href="#module-utils.plot_distributions" title="Permalink to this heading">¶</a></h2>
 <p>This module is used to analyze datasets before and after being processed by the model.
-It contains functions useful to graph the evolution of some important metrics as encoding space dimension
-and batch_size dimension change.</p>
+It contains functions useful to graph the evolution of some important metrics
+as encoding space dimension and batch_size dimension change.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="utils.plot_distributions.element_error">
 <span class="sig-prename descclassname"><span class="pre">utils.plot_distributions.</span></span><span class="sig-name descname"><span class="pre">element_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/plot_distributions.html#element_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.plot_distributions.element_error" title="Permalink to this definition">¶</a></dt>
@@ -57,7 +57,7 @@ enc: int. Encoding space dimension.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="utils.plot_distributions.element_error_tot">
-<span class="sig-prename descclassname"><span class="pre">utils.plot_distributions.</span></span><span class="sig-name descname"><span class="pre">element_error_tot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enc_lim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(3,</span> <span class="pre">15)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/plot_distributions.html#element_error_tot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.plot_distributions.element_error_tot" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">utils.plot_distributions.</span></span><span class="sig-name descname"><span class="pre">element_error_tot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enc_lim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(5,</span> <span class="pre">15)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/plot_distributions.html#element_error_tot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.plot_distributions.element_error_tot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Produce graphs about MRAE and MAE of every element mediated on every test with encoding space
 from enc_lim[0] to enc_lim[1].</p>
 <dl class="simple">
@@ -94,25 +94,26 @@ enc_lim: tuple. Minimum and maximum of encoding space dimension. Default = (3,15
 
 <dl class="py function">
 <dt class="sig sig-object py" id="utils.plot_distributions.matrix_error_graph_bs">
-<span class="sig-prename descclassname"><span class="pre">utils.plot_distributions.</span></span><span class="sig-name descname"><span class="pre">matrix_error_graph_bs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filenames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['5_bs40',</span> <span class="pre">'5_bs80',</span> <span class="pre">'5_bs100',</span> <span class="pre">'5',</span> <span class="pre">'5_bs300',</span> <span class="pre">'5_bs400']</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/plot_distributions.html#matrix_error_graph_bs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.plot_distributions.matrix_error_graph_bs" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">utils.plot_distributions.</span></span><span class="sig-name descname"><span class="pre">matrix_error_graph_bs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filenames</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/plot_distributions.html#matrix_error_graph_bs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.plot_distributions.matrix_error_graph_bs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Produce graphs about absolute error and relative absolute error of matrix elements.</p>
 <dl class="simple">
 <dt>Args:</dt><dd><p>path: directory path in which predicted and test matrix are contained.
-filenames: last part of file name. Default = [‘5_bs40’,’5_bs80’,’5_bs100’, ‘5’, ‘5_bs300’,’5_bs400’].</p>
+filenames: last part of file name.
+Default = [‘5_bs40’,’5_bs80’,’5_bs100’, ‘5’, ‘5_bs300’,’5_bs400’].</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="utils.plot_distributions.plot_hist">
-<span class="sig-prename descclassname"><span class="pre">utils.plot_distributions.</span></span><span class="sig-name descname"><span class="pre">plot_hist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'element'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'N'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/plot_distributions.html#plot_hist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.plot_distributions.plot_hist" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">utils.plot_distributions.</span></span><span class="sig-name descname"><span class="pre">plot_hist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'element'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'N'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/plot_distributions.html#plot_hist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.plot_distributions.plot_hist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Take residuals and plot histogram.</p>
 <dl>
-<dt>Args:</dt><dd><p>x: array to plot.</p>
+<dt>Args:</dt><dd><p>x_arr: array to plot.</p>
 <p>n_bins: number of bins. Deafault = 50.</p>
-<p>title: title of histogram. Default = ‘’</p>
-<p>xlabel: label of x axis. Default = ‘element’</p>
-<p>ylabel: label of y axis. Default = ‘N’</p>
+<p>title: title of histogram. Default = ‘’.</p>
+<p>xlabel: label of x axis. Default = ‘element’.</p>
+<p>ylabel: label of y axis. Default = ‘N’.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -201,7 +202,7 @@ n: number of points mediated during smoothing.</p>
 <h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Progetto CMEP</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">progetto_cmep</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="main.html">main module</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">utils package</a></li>
 </ul>
@@ -212,7 +213,7 @@ n: number of points mediated during smoothing.</p>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-  <li><a href="modules.html">Progetto CMEP</a><ul>
+  <li><a href="modules.html">progetto_cmep</a><ul>
       <li>Previous: <a href="main.html" title="previous chapter">main module</a></li>
   </ul></li>
   </ul></li>

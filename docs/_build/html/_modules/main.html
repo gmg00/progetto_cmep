@@ -61,18 +61,24 @@
 
 <div class="viewcode-block" id="preprocessing_dataset"><a class="viewcode-back" href="../main.html#main.preprocessing_dataset">[docs]</a><span class="k">def</span> <span class="nf">preprocessing_dataset</span><span class="p">(</span><span class="n">cov</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">save_scal</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">random_state</span> <span class="o">=</span> <span class="mi">42</span><span class="p">,</span> <span class="n">dir_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Normalize datasets and split them in training and test datasets.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        cov: matrix containing 15 significative elements of covariance matrix.</span>
+
 <span class="sd">        par: matrix containing 5 conditioning parameters.</span>
+
 <span class="sd">        save_scal: Boolean. If True create an array with scaling factors and save it.</span>
 <span class="sd">        Default = False.</span>
+
 <span class="sd">        random_state: random_state for train_test_split function. Default = 42.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        cov_train: training dataset containing covariance matrix elements.</span>
+
 <span class="sd">        cov_test: test dataset containing covariance matrix elements.</span>
+
 <span class="sd">        par_train: training dataset containing conditioning parameters.</span>
+
 <span class="sd">        par_test: test dataset containing conditioning parameters.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1">#Normalize dataset</span>
@@ -80,7 +86,10 @@
     <span class="n">scaler_par</span> <span class="o">=</span> <span class="n">preprocessing</span><span class="o">.</span><span class="n">Normalizer</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">par</span><span class="p">)</span>
 
     <span class="c1">#Split dataset in training and test</span>
-    <span class="n">cov_train0</span><span class="p">,</span> <span class="n">cov_test0</span><span class="p">,</span> <span class="n">par_train0</span><span class="p">,</span> <span class="n">par_test0</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">cov</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">)</span>
+    <span class="n">cov_train0</span><span class="p">,</span> <span class="n">cov_test0</span><span class="p">,</span> <span class="n">par_train0</span><span class="p">,</span> <span class="n">par_test0</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">cov</span><span class="p">,</span>
+                                                                    <span class="n">par</span><span class="p">,</span>
+                                                                    <span class="n">test_size</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                                                                    <span class="n">random_state</span><span class="o">=</span><span class="n">random_state</span><span class="p">)</span>
 
     <span class="n">cov_train</span> <span class="o">=</span> <span class="n">scaler_cov</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">cov_train0</span><span class="p">)</span>
     <span class="n">cov_test</span> <span class="o">=</span> <span class="n">scaler_cov</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">cov_test0</span><span class="p">)</span>
@@ -98,45 +107,8 @@
 
     <span class="k">return</span> <span class="n">cov_train</span><span class="p">,</span> <span class="n">cov_test</span><span class="p">,</span> <span class="n">par_train</span><span class="p">,</span> <span class="n">par_test</span></div>
 
-<div class="viewcode-block" id="my_model"><a class="viewcode-back" href="../main.html#main.my_model">[docs]</a><span class="k">def</span> <span class="nf">my_model</span><span class="p">(</span><span class="n">encoding_dim</span><span class="p">):</span>
-    <span class="c1">#Create an autoencoder model.</span>
-    <span class="c1">#Input data.</span>
-    <span class="n">input_data</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,))</span>  
-    <span class="c1">#Input parameters for conditioning.</span>
-    <span class="n">input_params</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,))</span>
-
-    <span class="c1">#Encoder.</span>
-    <span class="n">concat</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">()([</span><span class="n">input_data</span><span class="p">,</span> <span class="n">input_params</span><span class="p">])</span>
-
-    <span class="n">hidden</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span><span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">)(</span><span class="n">concat</span><span class="p">)</span>
-
-    <span class="n">hidden</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span><span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">)(</span><span class="n">hidden</span><span class="p">)</span>
-
-    <span class="n">hidden</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">)(</span><span class="n">hidden</span><span class="p">)</span>
-
-    <span class="c1">#hidden = BatchNormalization()(hidden)</span>
-
-    <span class="n">code</span><span class="o">=</span><span class="n">Dense</span><span class="p">(</span><span class="n">encoding_dim</span><span class="p">,</span><span class="n">activation</span><span class="o">=</span><span class="s1">&#39;sigmoid&#39;</span><span class="p">)(</span><span class="n">hidden</span><span class="p">)</span> <span class="c1">#Encoded.</span>
-
-    <span class="n">encodedstate</span> <span class="o">=</span> <span class="n">Activation</span><span class="p">(</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float16&#39;</span><span class="p">)(</span><span class="n">code</span><span class="p">)</span>
-
-    <span class="c1">#Decoder.</span>
-    <span class="n">concat</span> <span class="o">=</span> <span class="n">Concatenate</span><span class="p">()([</span><span class="n">encodedstate</span><span class="p">,</span> <span class="n">input_params</span><span class="p">])</span>
-
-    <span class="n">hidden</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">)(</span><span class="n">concat</span><span class="p">)</span>
-
-    <span class="n">hidden</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span><span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">)(</span><span class="n">hidden</span><span class="p">)</span>
-
-    <span class="n">hidden</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">)(</span><span class="n">hidden</span><span class="p">)</span>
-
-    
-    <span class="c1">#Output.</span>
-    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">)(</span><span class="n">hidden</span><span class="p">)</span>
-    
-
-    <span class="k">return</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="p">[</span><span class="n">input_data</span><span class="p">,</span> <span class="n">input_params</span><span class="p">],</span> <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="hist_res"><a class="viewcode-back" href="../main.html#main.hist_res">[docs]</a><span class="k">def</span> <span class="nf">hist_res</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">n_bins</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Residuals distribution&#39;</span><span class="p">,</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;x label&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;Residuals&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="hist_res"><a class="viewcode-back" href="../main.html#main.hist_res">[docs]</a><span class="k">def</span> <span class="nf">hist_res</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">n_bins</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+             <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Residuals distribution&#39;</span><span class="p">,</span> <span class="n">x_label</span><span class="o">=</span><span class="s1">&#39;x label&#39;</span><span class="p">,</span> <span class="n">y_label</span><span class="o">=</span><span class="s1">&#39;Residuals&#39;</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Take residuals and plot histogram.</span>
 
 <span class="sd">    Args:</span>
@@ -147,7 +119,7 @@
 <span class="sd">        title: title of histogram. Default = &#39;Residuals distribution&#39;</span>
 
 <span class="sd">        x_label: label of x axis. Default = &#39;x label&#39;</span>
-<span class="sd">        </span>
+
 <span class="sd">        y_label: label of y axis. Default = &#39;Residuals&#39;</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">n_bins</span><span class="p">)</span>
@@ -159,7 +131,7 @@
 
 <div class="viewcode-block" id="plot_loss"><a class="viewcode-back" href="../main.html#main.plot_loss">[docs]</a><span class="k">def</span> <span class="nf">plot_loss</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">val_loss</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Plot loss functions.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        loss: points of loss function.</span>
 
@@ -179,7 +151,7 @@
 
 <div class="viewcode-block" id="plot_metrics"><a class="viewcode-back" href="../main.html#main.plot_metrics">[docs]</a><span class="k">def</span> <span class="nf">plot_metrics</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">val_metric</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Metric functions&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Plot metric functions.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        metric: points of metric function.</span>
 
@@ -198,67 +170,70 @@
     <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span></div>
-    
-<div class="viewcode-block" id="generator"><a class="viewcode-back" href="../main.html#main.generator">[docs]</a><span class="k">def</span> <span class="nf">generator</span><span class="p">(</span><span class="n">X1_data</span><span class="p">,</span> <span class="n">X2_data</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Create a generator for model training. Training dataset is [covariance matrix, parameters] </span>
+
+<div class="viewcode-block" id="generator"><a class="viewcode-back" href="../main.html#main.generator">[docs]</a><span class="k">def</span> <span class="nf">generator</span><span class="p">(</span><span class="n">x1_data</span><span class="p">,</span> <span class="n">x2_data</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a generator for model training. Training dataset is [covariance matrix, parameters]</span>
 <span class="sd">    and target is [covariance matrix].</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        X1_data: train dataset composed by the 15 significative elements of covariance matrix. X1_data</span>
-<span class="sd">        is also the target.</span>
+<span class="sd">        x1_data: train dataset composed by the 15 significative elements of covariance matrix.</span>
+<span class="sd">        x1_data is also the target.</span>
 
-<span class="sd">        X2_data: 5 parameters used for conditioning during training.</span>
+<span class="sd">        x2_data: 5 parameters used for conditioning during training.</span>
 
 <span class="sd">        batch_size: integer. Number of samples per gradient update.</span>
 
 <span class="sd">    Yields:</span>
-<span class="sd">        [X1_batch,X2_batch], X1_batch: inputs batch of size = batch_size and target batch of size = batch_size.</span>
+<span class="sd">        [x1_batch,x2_batch], x1_batch:</span>
+<span class="sd">        inputs batch of size = batch_size and target batch of size = batch_size.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">samples_per_epoch</span> <span class="o">=</span> <span class="n">X1_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">samples_per_epoch</span> <span class="o">=</span> <span class="n">x1_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">number_of_batches</span> <span class="o">=</span> <span class="n">samples_per_epoch</span><span class="o">/</span><span class="n">batch_size</span>
-    <span class="n">ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X1_data</span><span class="p">))</span>
+    <span class="n">ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x1_data</span><span class="p">))</span>
     <span class="n">counter</span><span class="o">=</span><span class="mi">0</span>
-    <span class="n">X1_batch</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">X2_batch</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">x1_batch</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">x2_batch</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">counter</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
-            <span class="n">X1_data</span> <span class="o">=</span> <span class="n">X1_data</span><span class="p">[</span><span class="n">ids</span><span class="p">]</span>
-            <span class="n">X2_data</span> <span class="o">=</span> <span class="n">X2_data</span><span class="p">[</span><span class="n">ids</span><span class="p">]</span>
-        <span class="n">X1_batch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">X1_data</span><span class="p">[</span><span class="n">batch_size</span><span class="o">*</span><span class="n">counter</span><span class="p">:</span><span class="n">batch_size</span><span class="o">*</span><span class="p">(</span><span class="n">counter</span><span class="o">+</span><span class="mi">1</span><span class="p">)])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
-        <span class="n">X2_batch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">X2_data</span><span class="p">[</span><span class="n">batch_size</span><span class="o">*</span><span class="n">counter</span><span class="p">:</span><span class="n">batch_size</span><span class="o">*</span><span class="p">(</span><span class="n">counter</span><span class="o">+</span><span class="mi">1</span><span class="p">)])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
-        
+            <span class="n">x1_data</span> <span class="o">=</span> <span class="n">x1_data</span><span class="p">[</span><span class="n">ids</span><span class="p">]</span>
+            <span class="n">x2_data</span> <span class="o">=</span> <span class="n">x2_data</span><span class="p">[</span><span class="n">ids</span><span class="p">]</span>
+        <span class="n">x1_batch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x1_data</span><span class="p">[</span><span class="n">batch_size</span><span class="o">*</span><span class="n">counter</span><span class="p">:</span><span class="n">batch_size</span><span class="o">*</span><span class="p">(</span><span class="n">counter</span><span class="o">+</span><span class="mi">1</span><span class="p">)])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+        <span class="n">x2_batch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x2_data</span><span class="p">[</span><span class="n">batch_size</span><span class="o">*</span><span class="n">counter</span><span class="p">:</span><span class="n">batch_size</span><span class="o">*</span><span class="p">(</span><span class="n">counter</span><span class="o">+</span><span class="mi">1</span><span class="p">)])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+
         <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="k">yield</span> <span class="p">[</span><span class="n">X1_batch</span><span class="p">,</span><span class="n">X2_batch</span><span class="p">],</span><span class="n">X1_batch</span>
+        <span class="k">yield</span> <span class="p">[</span><span class="n">x1_batch</span><span class="p">,</span><span class="n">x2_batch</span><span class="p">],</span><span class="n">x1_batch</span>
 
         <span class="c1">#restart counter to yeild data in the next epoch as well</span>
         <span class="k">if</span> <span class="n">counter</span> <span class="o">&gt;=</span> <span class="n">number_of_batches</span><span class="p">:</span>
             <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span></div>
 
-<div class="viewcode-block" id="predict_generator"><a class="viewcode-back" href="../main.html#main.predict_generator">[docs]</a><span class="k">def</span> <span class="nf">predict_generator</span><span class="p">(</span><span class="n">X1_data</span><span class="p">,</span> <span class="n">X2_data</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Create a generator for model.predict() function. Test dataset is [covariance matrix, parameters].</span>
+<div class="viewcode-block" id="predict_generator"><a class="viewcode-back" href="../main.html#main.predict_generator">[docs]</a><span class="k">def</span> <span class="nf">predict_generator</span><span class="p">(</span><span class="n">x1_data</span><span class="p">,</span> <span class="n">x2_data</span><span class="p">,</span> <span class="n">batch_size</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a generator for model.predict() function.</span>
+<span class="sd">    Test dataset is [covariance matrix, parameters].</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        X1_data: test dataset composed by the 15 significative elements of covariance matrix.</span>
+<span class="sd">        x1_data: test dataset composed by the 15 significative elements of covariance matrix.</span>
 
-<span class="sd">        X2_data: 5 parameters used for conditioning.</span>
+<span class="sd">        x2_data: 5 parameters used for conditioning.</span>
 
 <span class="sd">        batch_size: integer. Number of samples per gradient update.</span>
 
 <span class="sd">    Yields:</span>
-<span class="sd">        [X1_batch,X2_batch]: inputs batch of size = batch_size.</span>
+<span class="sd">        [x1_batch,x2_batch]: inputs batch of size = batch_size.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">counter</span><span class="o">=</span><span class="mi">0</span>
-    <span class="n">X1_batch</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">X2_batch</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">x1_batch</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">x2_batch</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">X1_batch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">X1_data</span><span class="p">[</span><span class="n">batch_size</span><span class="o">*</span><span class="n">counter</span><span class="p">:</span><span class="n">batch_size</span><span class="o">*</span><span class="p">(</span><span class="n">counter</span><span class="o">+</span><span class="mi">1</span><span class="p">)])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
-        <span class="n">X2_batch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">X2_data</span><span class="p">[</span><span class="n">batch_size</span><span class="o">*</span><span class="n">counter</span><span class="p">:</span><span class="n">batch_size</span><span class="o">*</span><span class="p">(</span><span class="n">counter</span><span class="o">+</span><span class="mi">1</span><span class="p">)])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+        <span class="n">x1_batch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x1_data</span><span class="p">[</span><span class="n">batch_size</span><span class="o">*</span><span class="n">counter</span><span class="p">:</span><span class="n">batch_size</span><span class="o">*</span><span class="p">(</span><span class="n">counter</span><span class="o">+</span><span class="mi">1</span><span class="p">)])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
+        <span class="n">x2_batch</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x2_data</span><span class="p">[</span><span class="n">batch_size</span><span class="o">*</span><span class="n">counter</span><span class="p">:</span><span class="n">batch_size</span><span class="o">*</span><span class="p">(</span><span class="n">counter</span><span class="o">+</span><span class="mi">1</span><span class="p">)])</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float32&#39;</span><span class="p">)</span>
         <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="k">yield</span> <span class="p">[</span><span class="n">X1_batch</span><span class="p">,</span> <span class="n">X2_batch</span><span class="p">],</span></div>
+        <span class="k">yield</span> <span class="p">[</span><span class="n">x1_batch</span><span class="p">,</span> <span class="n">x2_batch</span><span class="p">],</span></div>
 
 <div class="viewcode-block" id="my_metric"><a class="viewcode-back" href="../main.html#main.my_metric">[docs]</a><span class="k">def</span> <span class="nf">my_metric</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Compute loss = mean(sqrt(y_true - y_pred)**2 / y_true**2), axis=-1) only on diagonal elements.</span>
+    <span class="sd">&#39;&#39;&#39;Compute loss = mean(sqrt(y_true - y_pred)**2 / y_true**2), axis=-1)</span>
+<span class="sd">    only on diagonal elements.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        y_true: array of true values.</span>
@@ -268,14 +243,13 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        metric: tensorflow.tensor. Mean quadratic relative error metric on diagonal elements.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    
-    <span class="c1">#temp = tf.math.xdivy(tf.math.sqrt(tf.square(y_true-y_pred)),tf.square(y_true))</span>
+
     <span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">14</span><span class="p">]</span>
     <span class="n">y_true</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
     <span class="n">y_pred</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
     <span class="n">temp</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">xdivy</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">y_true</span><span class="o">-</span><span class="n">y_pred</span><span class="p">),</span><span class="n">tf</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">y_true</span><span class="p">)))</span>
 
-    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> </div>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="my_metric2"><a class="viewcode-back" href="../main.html#main.my_metric2">[docs]</a><span class="k">def</span> <span class="nf">my_metric2</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Compute loss = mean(abs((y_true - y_pred) / y_true)), axis=-1)</span>
@@ -288,13 +262,14 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        metric: tensorflow.tensor. Mean absolute relative error metric.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    
+
     <span class="n">temp</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">xdivy</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">y_true</span><span class="o">-</span><span class="n">y_pred</span><span class="p">),</span><span class="n">tf</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">y_true</span><span class="p">)))</span>
 
-    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> </div>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="my_metric3"><a class="viewcode-back" href="../main.html#main.my_metric3">[docs]</a><span class="k">def</span> <span class="nf">my_metric3</span><span class="p">(</span><span class="n">y_true</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">epsilon</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">)):</span>
-    <span class="sd">&#39;&#39;&#39;Compute loss = mean(abs((y_true - y_pred) / (y_true + epsilon))), axis=-1) only on diagonal elements.</span>
+    <span class="sd">&#39;&#39;&#39;Compute loss = mean(abs((y_true - y_pred) / (y_true + epsilon))), axis=-1)</span>
+<span class="sd">    only on diagonal elements.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        y_true: array of true values.</span>
@@ -311,7 +286,7 @@
     <span class="n">y_pred</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">y_pred</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
     <span class="n">temp</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">xdivy</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">y_true</span><span class="o">-</span><span class="n">y_pred</span><span class="p">),</span><span class="n">tf</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">y_true</span> <span class="o">+</span> <span class="n">epsilon</span><span class="p">)))</span>
 
-    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> </div>
+    <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_mean</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="main"><a class="viewcode-back" href="../main.html#main.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">dir_name</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Main function. Create a model, fit that model and save the results.</span>
@@ -319,11 +294,11 @@
 <span class="sd">    Args:</span>
 <span class="sd">        dir_name: name of directory in which is contained input datasets.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    
+
     <span class="n">model_name</span> <span class="o">=</span> <span class="s1">&#39;enc3&#39;</span>
 
     <span class="c1">#Get covariance matrix.</span>
-    
+
     <span class="n">cov</span> <span class="o">=</span> <span class="n">get_file</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">dir_name</span><span class="si">}</span><span class="s1">/data/inputs/cov_tot.npy&#39;</span><span class="p">)</span>
 
     <span class="c1">#Get parameters for conditioning.</span>
@@ -331,12 +306,12 @@
     <span class="n">par</span> <span class="o">=</span> <span class="n">get_file</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">dir_name</span><span class="si">}</span><span class="s1">/data/inputs/par_tot.npy&#39;</span><span class="p">)</span>
 
     <span class="n">cov_train</span><span class="p">,</span> <span class="n">cov_test</span><span class="p">,</span> <span class="n">par_train</span><span class="p">,</span> <span class="n">par_test</span> <span class="o">=</span> <span class="n">preprocessing_dataset</span><span class="p">(</span><span class="n">cov</span><span class="p">,</span> <span class="n">par</span><span class="p">)</span>
-    
+
     <span class="c1">#model = my_model(5)</span>
 
     <span class="c1">#Create an autoencoder model.</span>
     <span class="c1">#Input data.</span>
-    <span class="n">input_data</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,))</span>  
+    <span class="n">input_data</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,))</span>
     <span class="c1">#Input parameters for conditioning.</span>
     <span class="n">input_params</span> <span class="o">=</span> <span class="n">Input</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,))</span>
 
@@ -364,19 +339,20 @@
 
     <span class="n">hidden</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">)(</span><span class="n">hidden</span><span class="p">)</span>
 
-    
+
     <span class="c1">#Output.</span>
     <span class="n">outputs</span> <span class="o">=</span> <span class="n">Dense</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">)(</span><span class="n">hidden</span><span class="p">)</span>
-    
+
 
     <span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="p">[</span><span class="n">input_data</span><span class="p">,</span> <span class="n">input_params</span><span class="p">],</span> <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span>
     <span class="n">model</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">loss</span><span class="o">=</span><span class="s1">&#39;MSE&#39;</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="s1">&#39;adam&#39;</span><span class="p">,</span> <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="n">my_metric</span><span class="p">,</span> <span class="n">my_metric2</span><span class="p">,</span> <span class="n">my_metric3</span><span class="p">])</span>
     <span class="n">model</span><span class="o">.</span><span class="n">summary</span><span class="p">()</span>
-    <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">plot_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dir_name</span><span class="si">}</span><span class="s2">/data/models/model_</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">,</span> <span class="n">show_shapes</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    
-    
+    <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">plot_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dir_name</span><span class="si">}</span><span class="s2">/data/models/model_</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">,</span>
+                              <span class="n">show_shapes</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
     <span class="c1">#Dictionary of training settings</span>
-    <span class="n">dt</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">train_dt</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;validation_split&quot;</span> <span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
         <span class="s2">&quot;epochs&quot;</span> <span class="p">:</span> <span class="mi">1000</span><span class="p">,</span>
         <span class="s2">&quot;batch_size&quot;</span> <span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
@@ -390,26 +366,33 @@
         <span class="p">}</span>
 
     <span class="c1">##Training.</span>
-    
+
     <span class="c1">#Split cov_train and par_train in train and validation datasets.</span>
-    <span class="n">cov_train</span><span class="p">,</span> <span class="n">cov_val</span><span class="p">,</span> <span class="n">par_train</span><span class="p">,</span> <span class="n">par_val</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">cov_train</span><span class="p">,</span> <span class="n">par_train</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+    <span class="n">cov_train</span><span class="p">,</span> <span class="n">cov_val</span><span class="p">,</span> <span class="n">par_train</span><span class="p">,</span> <span class="n">par_val</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">cov_train</span><span class="p">,</span>
+                                                              <span class="n">par_train</span><span class="p">,</span>
+                                                              <span class="n">test_size</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                                                              <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
 
     <span class="c1">#print(f&#39;len/batch_size = {cov_train.shape[0] // dt[&quot;batch_size&quot;]}&#39;)</span>
 
     <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Press a button to start training&quot;</span><span class="p">)</span>
-    
-    <span class="n">gen</span> <span class="o">=</span> <span class="n">generator</span><span class="p">(</span><span class="n">cov_train</span><span class="p">,</span> <span class="n">par_train</span><span class="p">,</span> <span class="n">dt</span><span class="p">[</span><span class="s1">&#39;batch_size&#39;</span><span class="p">])</span>
+
+    <span class="n">gen</span> <span class="o">=</span> <span class="n">generator</span><span class="p">(</span><span class="n">cov_train</span><span class="p">,</span> <span class="n">par_train</span><span class="p">,</span> <span class="n">train_dt</span><span class="p">[</span><span class="s1">&#39;batch_size&#39;</span><span class="p">])</span>
 
     <span class="n">history</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
         <span class="n">gen</span><span class="p">,</span>
-        <span class="n">epochs</span><span class="o">=</span><span class="n">dt</span><span class="p">[</span><span class="s1">&#39;epochs&#39;</span><span class="p">],</span>
-        <span class="n">steps_per_epoch</span> <span class="o">=</span> <span class="n">cov_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">//</span><span class="n">dt</span><span class="p">[</span><span class="s1">&#39;batch_size&#39;</span><span class="p">],</span>
-        <span class="n">validation_data</span> <span class="o">=</span> <span class="n">generator</span><span class="p">(</span><span class="n">cov_val</span><span class="p">,</span><span class="n">par_val</span><span class="p">,</span><span class="n">dt</span><span class="p">[</span><span class="s1">&#39;batch_size&#39;</span><span class="p">]),</span>
-        <span class="n">validation_steps</span> <span class="o">=</span> <span class="n">cov_val</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">//</span><span class="n">dt</span><span class="p">[</span><span class="s1">&#39;batch_size&#39;</span><span class="p">],</span>
-        <span class="n">callbacks</span> <span class="o">=</span> <span class="p">[</span><span class="n">EarlyStopping</span><span class="p">(</span><span class="n">monitor</span><span class="o">=</span><span class="n">dt</span><span class="p">[</span><span class="s2">&quot;EarlyStopping_monitor&quot;</span><span class="p">],</span> <span class="n">patience</span><span class="o">=</span><span class="n">dt</span><span class="p">[</span><span class="s2">&quot;EarlyStopping_patience&quot;</span><span class="p">],</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
-                     <span class="n">ReduceLROnPlateau</span><span class="p">(</span><span class="n">monitor</span><span class="o">=</span><span class="n">dt</span><span class="p">[</span><span class="s2">&quot;ReduceLROnPlateau_monitor&quot;</span><span class="p">],</span> <span class="n">factor</span><span class="o">=</span><span class="n">dt</span><span class="p">[</span><span class="s2">&quot;ReduceLROnPlateau_factor&quot;</span><span class="p">],</span>
-                                       <span class="n">patience</span><span class="o">=</span><span class="n">dt</span><span class="p">[</span><span class="s2">&quot;ReduceLROnPlateau_patience&quot;</span><span class="p">],</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)])</span>
-    
+        <span class="n">epochs</span><span class="o">=</span><span class="n">train_dt</span><span class="p">[</span><span class="s1">&#39;epochs&#39;</span><span class="p">],</span>
+        <span class="n">steps_per_epoch</span> <span class="o">=</span> <span class="n">cov_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">//</span><span class="n">train_dt</span><span class="p">[</span><span class="s1">&#39;batch_size&#39;</span><span class="p">],</span>
+        <span class="n">validation_data</span> <span class="o">=</span> <span class="n">generator</span><span class="p">(</span><span class="n">cov_val</span><span class="p">,</span><span class="n">par_val</span><span class="p">,</span><span class="n">train_dt</span><span class="p">[</span><span class="s1">&#39;batch_size&#39;</span><span class="p">]),</span>
+        <span class="n">validation_steps</span> <span class="o">=</span> <span class="n">cov_val</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">//</span><span class="n">train_dt</span><span class="p">[</span><span class="s1">&#39;batch_size&#39;</span><span class="p">],</span>
+        <span class="n">callbacks</span> <span class="o">=</span> <span class="p">[</span><span class="n">EarlyStopping</span><span class="p">(</span><span class="n">monitor</span><span class="o">=</span><span class="n">train_dt</span><span class="p">[</span><span class="s2">&quot;EarlyStopping_monitor&quot;</span><span class="p">],</span>
+                                   <span class="n">patience</span><span class="o">=</span><span class="n">train_dt</span><span class="p">[</span><span class="s2">&quot;EarlyStopping_patience&quot;</span><span class="p">],</span>
+                                   <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                     <span class="n">ReduceLROnPlateau</span><span class="p">(</span><span class="n">monitor</span><span class="o">=</span><span class="n">train_dt</span><span class="p">[</span><span class="s2">&quot;ReduceLROnPlateau_monitor&quot;</span><span class="p">],</span>
+                                       <span class="n">factor</span><span class="o">=</span><span class="n">train_dt</span><span class="p">[</span><span class="s2">&quot;ReduceLROnPlateau_factor&quot;</span><span class="p">],</span>
+                                       <span class="n">patience</span><span class="o">=</span><span class="n">train_dt</span><span class="p">[</span><span class="s2">&quot;ReduceLROnPlateau_patience&quot;</span><span class="p">],</span>
+                                       <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">)])</span>
+
     <span class="c1">##Plot loss.</span>
     <span class="n">plot_loss</span><span class="p">(</span><span class="n">history</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s1">&#39;loss&#39;</span><span class="p">],</span> <span class="n">history</span><span class="o">.</span><span class="n">history</span><span class="p">[</span><span class="s1">&#39;val_loss&#39;</span><span class="p">])</span>
     <span class="c1">#plt.savefig(dir_name + &#39;/data/models/loss_&#39; + model_name +&#39;.png&#39;)</span>
@@ -422,29 +405,26 @@
     <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Press a button to continue&quot;</span><span class="p">)</span>
 
     <span class="c1">##Encoder-decoder division.</span>
-    <span class="c1">#Provare a mettere nella funzione my_model la possibilità di scegliere encoder decoder o intero modello, se non funziona riportare il modello nel main.</span>
+
     <span class="n">encoder</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="p">[</span><span class="n">input_data</span><span class="p">,</span> <span class="n">input_params</span><span class="p">],</span> <span class="n">outputs</span><span class="o">=</span><span class="n">encodedstate</span><span class="p">)</span>
     <span class="c1">#decoder = Model(inputs=[encodedstate, input_params] , outputs=outputs)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Encoder predictions&quot;</span><span class="p">)</span>
     <span class="c1">#cov_enc = encoder.predict([cov_test, par_test],batch_size=1)</span>
-    <span class="n">cov_enc</span> <span class="o">=</span> <span class="n">encoder</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">predict_generator</span><span class="p">(</span><span class="n">cov_test</span><span class="p">,</span><span class="n">par_test</span><span class="p">,</span><span class="n">dt</span><span class="p">[</span><span class="s1">&#39;batch_size&#39;</span><span class="p">]),</span>
-                             <span class="n">steps</span> <span class="o">=</span> <span class="n">cov_test</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">//</span><span class="n">dt</span><span class="p">[</span><span class="s1">&#39;batch_size&#39;</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">cov_enc</span> <span class="o">=</span> <span class="n">encoder</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">predict_generator</span><span class="p">(</span><span class="n">cov_test</span><span class="p">,</span><span class="n">par_test</span><span class="p">,</span><span class="n">train_dt</span><span class="p">[</span><span class="s1">&#39;batch_size&#39;</span><span class="p">]),</span>
+                             <span class="n">steps</span> <span class="o">=</span> <span class="n">cov_test</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">//</span><span class="n">train_dt</span><span class="p">[</span><span class="s1">&#39;batch_size&#39;</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span>
                              <span class="n">verbose</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
-    
+
     <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">dir_name</span> <span class="o">+</span> <span class="s1">&#39;/data/outputs/cov_enc_&#39;</span> <span class="o">+</span> <span class="n">model_name</span> <span class="o">+</span> <span class="s1">&#39;.npy&#39;</span><span class="p">,</span> <span class="n">cov_enc</span><span class="p">)</span>
 
     <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Press a button to continue&quot;</span><span class="p">)</span>
-   
 
     <span class="c1">##Test</span>
-    
+
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;cov_test shape = </span><span class="si">{</span><span class="n">cov_test</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="c1">#cov_pred = model.predict([cov_test, par_test],batch_size=1)</span>
-    
-    <span class="n">cov_pred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">predict_generator</span><span class="p">(</span><span class="n">cov_test</span><span class="p">,</span><span class="n">par_test</span><span class="p">,</span><span class="n">dt</span><span class="p">[</span><span class="s1">&#39;batch_size&#39;</span><span class="p">]),</span>
-                             <span class="n">steps</span> <span class="o">=</span> <span class="n">cov_test</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">//</span><span class="n">dt</span><span class="p">[</span><span class="s1">&#39;batch_size&#39;</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span>
+
+    <span class="n">cov_pred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">predict_generator</span><span class="p">(</span><span class="n">cov_test</span><span class="p">,</span><span class="n">par_test</span><span class="p">,</span><span class="n">train_dt</span><span class="p">[</span><span class="s1">&#39;batch_size&#39;</span><span class="p">]),</span>
+                             <span class="n">steps</span> <span class="o">=</span> <span class="n">cov_test</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">//</span><span class="n">train_dt</span><span class="p">[</span><span class="s1">&#39;batch_size&#39;</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span>
                              <span class="n">verbose</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
-    
 
     <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">dir_name</span> <span class="o">+</span> <span class="s1">&#39;/data/outputs/cov_pred_&#39;</span> <span class="o">+</span> <span class="n">model_name</span> <span class="o">+</span> <span class="s1">&#39;.npy&#39;</span><span class="p">,</span> <span class="n">cov_pred</span><span class="p">)</span>
 
@@ -469,12 +449,8 @@
     <span class="c1"># Fixing random state for reproducibility</span>
     <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
 
-    <span class="n">folder</span> <span class="o">=</span> <span class="s1">&#39;/mnt/c/Users/HP/Desktop/progetto_cmep&#39;</span>
-    <span class="n">main</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
-
-
-    
-    
+    <span class="n">DIR_NAME</span> <span class="o">=</span> <span class="s1">&#39;/mnt/c/Users/HP/Desktop/progetto_cmep&#39;</span>
+    <span class="n">main</span><span class="p">(</span><span class="n">DIR_NAME</span><span class="p">)</span>
 </pre></div>
 
           </div>
@@ -495,7 +471,7 @@
 <h3>Navigation</h3>
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../modules.html">Progetto CMEP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">progetto_cmep</a></li>
 </ul>
 
 <div class="relations">

@@ -1,9 +1,9 @@
-.. Progetto CMEP documentation master file, created by
-   sphinx-quickstart on Tue Aug 29 23:36:34 2023.
+.. progetto_cmep documentation master file, created by
+   sphinx-quickstart on Mon Sep 11 10:59:58 2023.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Progetto CMEP's documentation!
+Welcome to progetto_cmep's documentation!
 =========================================
 
 .. toctree::

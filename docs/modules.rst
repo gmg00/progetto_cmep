@@ -1,4 +1,4 @@
-Progetto CMEP
+progetto_cmep
 =============
 
 .. toctree::
