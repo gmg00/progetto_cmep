@@ -1,30 +1,41 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn import preprocessing
+"""This module is used to analyze datasets before and after being processed by the model.
+It contains functions useful to graph the evolution of some important metrics
+as encoding space dimension and batch_size dimension change.
+"""
 
-from math import *
-# Fixing random state for reproducibility
-np.random.seed(123)
+def plot_hist(x_arr, n_bins=50, title='', xlabel='element', ylabel='N'):
+    '''Take residuals and plot histogram.
 
-def plot_hist(x, n_bins=50, title='', xlabel='element', ylabel='N'):
-    plt.hist(x,n_bins)
+    Args:
+        x_arr: array to plot.
+
+        n_bins: number of bins. Deafault = 50.
+
+        title: title of histogram. Default = ''.
+
+        xlabel: label of x axis. Default = 'element'.
+
+        ylabel: label of y axis. Default = 'N'.
+    '''
+    plt.hist(x_arr,n_bins)
     plt.xlabel(xlabel, size=12)
     plt.ylabel(ylabel, size=12)
     plt.title(title, size=15)
     plt.grid()
 
-def percentile_matrix(cov,p):
-    s = cov.sum()
-    if s >= 0:
-        pcov = cov[abs(cov) < np.percentile(cov,p)]
-        return pcov
-    elif s < 0:
-        pcov = cov[abs(cov) > -np.percentile(-cov,p)]
-        return pcov
+def hist_res(res, n_bins=50, title='', x_label='x label', y_label='Residuals'):
+    '''Take residuals and plot histogram.
 
-def hist_res(res, n_bins=50, title='', x_label='x label',
-             y_label='Residuals'):
-    '''Take residuals and plot histogram. 
+    Args:
+        res: residuals array.
+
+        n_bins: number of bins. Deafault = 50.
+
+        title: title of histogram. Default = 'Residuals distribution'
+
+        x_label: label of x axis. Default = 'x label'
+        
+        y_label: label of y axis. Default = 'Residuals'
     '''
     plt.hist(res, n_bins)
     plt.title(title, size=15)
@@ -32,14 +43,21 @@ def hist_res(res, n_bins=50, title='', x_label='x label',
     plt.ylabel(y_label, size=12)
     plt.grid()
 
-def matrix_error_graph(path, enc_lim=(5,15),tot_graph=True, compare_diag_matrix=True):
+def matrix_error_graph(path, enc_lim=(3,15)):
+    """Produce graphs about absolute error and relative absolute error of matrix elements.
+
+    Args:
+        path: directory path in which predicted and test matrix are contained.
+        enc_lim: tuple. Minimum and maximum of encoding space dimension. Default = (3,15)
+    """
     index = [0, 5, 9, 12, 14]
-    n = enc_lim[1] - enc_lim[0] + 1 
-    mean_relative_absolute_error = np.zeros((n,5))
-    mean_absolute_error = np.zeros((n,5))
-    tot_abs_error = np.zeros(n)
-    tot_rel_abs_error = np.zeros(n)
+    n_dim = enc_lim[1] - enc_lim[0] + 1
+    mean_relative_absolute_error = np.zeros((n_dim,5))
+    mean_absolute_error = np.zeros((n_dim,5))
+    tot_abs_error = np.zeros(n_dim)
+    tot_rel_abs_error = np.zeros(n_dim)
     scal = np.load(f'{path}scal.npy')
+    eps=0
 
     for i in range(enc_lim[0],enc_lim[1]+1):
         print(f'Opening enc_{i}')
@@ -48,167 +66,220 @@ def matrix_error_graph(path, enc_lim=(5,15),tot_graph=True, compare_diag_matrix=
         cov_pred = np.transpose(np.transpose(cov_pred)*scal)
         cov_test = np.transpose(np.transpose(cov_test)*scal)
         k = 0
-        for o in index:
+        for ind in index:
             print(f'Starting mean on the {k}° diagonal element')
-            a = np.abs((cov_test[:,o] - cov_pred[:,o])/(cov_test[:,o]+10**(-4)))
-            b = np.abs(cov_test[:,o] - cov_pred[:,o])
-            mean_relative_absolute_error[i-5,k] = a.mean()
-            mean_absolute_error[i-5,k] = b.mean()
+            temp_a = np.abs((cov_test[:,ind] - cov_pred[:,ind])/(cov_test[:,ind]+eps))
+            temp_b = np.abs(cov_test[:,ind] - cov_pred[:,ind])
+            mean_relative_absolute_error[i-enc_lim[0],k] = temp_a.mean()
+            mean_absolute_error[i-enc_lim[0],k] = temp_b.mean()
             k += 1
-        if tot_graph:
-            a = np.abs((cov_test - cov_pred)/(cov_test+10**(-4)))
-            b = np.abs(cov_test - cov_pred)
-            tot_rel_abs_error[i-5] = a.mean()
-            tot_abs_error[i-5] = b.mean()
-    print(mean_absolute_error)
-    print(mean_relative_absolute_error)
+        temp_a = np.abs((cov_test - cov_pred)/(cov_test+eps))
+        temp_b = np.abs(cov_test - cov_pred)
+        tot_rel_abs_error[i-enc_lim[0]] = temp_a.mean()
+        tot_abs_error[i-enc_lim[0]] = temp_b.mean()
 
-    titles = ['qoverp', 'lambda', 'phi', 'dxy', 'dsz']
-    if tot_graph:
-        plt.figure(f'Mean Absolute Error entire matrix Graph')
-        plt.plot(np.arange(enc_lim[0],enc_lim[1]+1),tot_abs_error,'-',label='mean absolute error')
-        plt.ylabel('Errors', size=12)
-        plt.xlabel('Encoding nodes', size=12)
-        plt.title(f'Mean Absolute Error entire matrix Graph', size=15)
+    plt.figure('Compare entrire matrix and diagonal relative error')
+    plt.subplot(2,1,1)
+    plt.plot(np.arange(enc_lim[0],enc_lim[1]+1),mean_relative_absolute_error.mean(axis=1),
+             'ko--',label='mean absolute error')
+    plt.ylabel('Digonal MRAE', size=15)
+    plt.xlabel('Encoding nodes', size=15)
+    plt.xticks(np.arange(enc_lim[0],enc_lim[1]+1))
+    plt.title('Mean relative absolute error (MRAE)', size=18)
+    plt.xticks(size=15)
+    plt.yticks(size=15)
+    plt.grid()
+    plt.subplot(2,1,2)
+    plt.plot(np.arange(enc_lim[0],enc_lim[1]+1),tot_rel_abs_error,
+             'ko--',label='mean absolute error')
+    plt.ylabel('Entire matrix MRAE', size=15)
+    plt.xlabel('Encoding nodes', size=15)
+    plt.xticks(size=15)
+    plt.yticks(size=15)
+    plt.xticks(np.arange(enc_lim[0],enc_lim[1]+1))
+    plt.grid()
 
-        if compare_diag_matrix:
-            plt.figure(f'Compare entrire matrix and diagonal relative error')
-            plt.subplot(2,1,1)
-            plt.plot(np.arange(enc_lim[0],enc_lim[1]+1),mean_relative_absolute_error.mean(axis=1),'-',label='mean absolute error')
-            plt.ylabel('Digonal mean relative absolute error', size=12)
-            plt.xlabel('Encoding nodes', size=12)
-            plt.title(f'Compare entrire matrix and diagonal relative error', size=15)
-            plt.grid()
-            plt.subplot(2,1,2)
-            plt.plot(np.arange(enc_lim[0],enc_lim[1]+1),tot_rel_abs_error,'-',label='mean absolute error')
-            plt.ylabel('Entire matrix mean relative absolute error', size=12)
-            plt.xlabel('Encoding nodes', size=12)
-            plt.grid()
+    plt.figure('Compare entrire matrix and diagonal absolute error')
+    plt.subplot(2,1,1)
+    plt.plot(np.arange(enc_lim[0],enc_lim[1]+1),mean_absolute_error.mean(axis=1),
+             'ko--',label='mean absolute error')
+    plt.ylabel('Diagonal MAE', size=15)
+    plt.xlabel('Encoding nodes', size=15)
+    plt.title('Mean absolute error (MAE)', size=18)
+    plt.xticks(size=15)
+    plt.yticks(size=15)
+    plt.grid()
+    plt.subplot(2,1,2)
+    plt.plot(np.arange(enc_lim[0],enc_lim[1]+1),tot_abs_error,
+             'ko--',label='mean absolute error')
+    plt.ylabel('Entire matrix MAE', size=15)
+    plt.xlabel('Encoding nodes', size=15)
+    plt.xticks(size=15)
+    plt.yticks(size=15)
+    plt.grid()
 
-            plt.figure(f'Compare entrire matrix and diagonal absolute error')
-            plt.subplot(2,1,1)
-            plt.plot(np.arange(enc_lim[0],enc_lim[1]+1),mean_absolute_error.mean(axis=1),'-',label='mean absolute error')
-            plt.ylabel('Digonal mean absolute error', size=12)
-            plt.xlabel('Encoding nodes', size=12)
-            plt.title(f'Compare entrire matrix and diagonal absolute error', size=15)
-            plt.grid()
-            plt.subplot(2,1,2)
-            plt.plot(np.arange(enc_lim[0],enc_lim[1]+1),tot_abs_error,'-',label='mean absolute error')
-            plt.ylabel('Entire matrix mean absolute error', size=12)
-            plt.xlabel('Encoding nodes', size=12)
-            plt.grid()
+def element_error(path, enc):
+    """Produce graphs about MRAE and MAE of every element given the encoding space of the test.
 
+    Args:
+        path: directory path in which predicted and test matrix are contained.
+        enc: int. Encoding space dimension.
+    """
+    scal = np.load(f'{path}scal.npy')
+    cov_pred = np.load(f'{path}cov_pred_enc{enc}.npy')
+    cov_test = np.load(f'{path}cov_test_enc{enc}.npy')
+    cov_pred = np.transpose(np.transpose(cov_pred)*scal)
+    cov_test = np.transpose(np.transpose(cov_test)*scal)
 
-    plt.figure(f'Mean Absolute Error entire diagonal Graph')
-    plt.plot(np.arange(enc_lim[0],enc_lim[1]+1),mean_relative_absolute_error.mean(axis=1),'-',label='mean absolute error')
-    plt.ylabel('Errors', size=12)
+    mean_relative_absolute_error = np.zeros(15)
+
+    for i in range(15):
+        temp = (np.abs((cov_test[:,i] - cov_pred[:,i])/(cov_test[:,i])))
+        mean_relative_absolute_error[i] = temp.mean()
+
+    plt.figure('Elements errors')
+    plt.plot(range(15),mean_relative_absolute_error)
+    plt.xlabel('Element', size=15)
+    plt.ylabel('MRAE', size=15)
+
+def element_error_tot(path, enc_lim=(5,15)):
+    """Produce graphs about MRAE and MAE of every element mediated on every test with encoding space
+    from enc_lim[0] to enc_lim[1].
+
+    Args:
+        path: directory path in which predicted and test matrix are contained.
+        enc_lim: tuple. Minimum and maximum of encoding space dimension. Default = (3,15)
+    """
+    n_dim = enc_lim[1] - enc_lim[0] + 1
+    mean_relative_absolute_error = np.zeros((n_dim,15))
+    mean_absolute_error = np.zeros((n_dim,15))
+    scal = np.load(f'{path}scal.npy')
+    eps=0
+
+    for i in range(enc_lim[0],enc_lim[1]+1):
+        print(f'Opening enc_{i}')
+        cov_pred = np.load(f'{path}cov_pred_enc{str(i)}.npy')
+        cov_test = np.load(f'{path}cov_test_enc{str(i)}.npy')
+        cov_pred = np.transpose(np.transpose(cov_pred)*scal)
+        cov_test = np.transpose(np.transpose(cov_test)*scal)
+        for j in range(15):
+            print(f'Starting mean on the {j}° diagonal element')
+            temp_a = np.abs((cov_test[:,j] - cov_pred[:,j])/(cov_test[:,j]+eps))
+            temp_b = np.abs(cov_test[:,j] - cov_pred[:,j])
+            mean_relative_absolute_error[i-enc_lim[0],j] = temp_a.mean()
+            mean_absolute_error[i-enc_lim[0],j] = temp_b.mean()
+
+    mrae = mean_relative_absolute_error.mean(axis=0)
+    mae = mean_absolute_error.mean(axis=0)
+    plt.figure('Element errors 2')
+    plt.subplot(2,1,1)
+    plt.stem(range(15),mrae, basefmt=' ',markerfmt='k.',linefmt='k--')
+    plt.title('MRAE and MAE on elements', size=18)
+    plt.xticks(range(15), size=15)
+    plt.yticks(size=15)
+    plt.xlabel('Element index',size=15)
+    plt.ylabel('MRAE',size=15)
+    plt.yscale('log')
+    plt.grid()
+    plt.subplot(2,1,2)
+    plt.stem(range(15),mae, basefmt=' ',markerfmt='k.',linefmt='k--')
+    plt.xlabel('Element index',size=15)
+    plt.xticks(range(15),size=15)
+    plt.ylabel('MAE',size=15)
+    plt.yticks(size=15)
+    plt.grid()
+
+def matrix_error_graph_bs(path, filenames):
+    """Produce graphs about absolute error and relative absolute error of matrix elements.
+
+    Args:
+        path: directory path in which predicted and test matrix are contained.
+        filenames: last part of file name.
+        Default = ['5_bs40','5_bs80','5_bs100', '5', '5_bs300','5_bs400'].
+    """
+    index = [0, 5, 9, 12, 14]
+    n_dim = len(filenames)
+    mean_relative_absolute_error = np.zeros((n_dim,5))
+    mean_absolute_error = np.zeros((n_dim,5))
+    tot_abs_error = np.zeros(n_dim)
+    tot_rel_abs_error = np.zeros(n_dim)
+    scal = np.load(f'{path}scal.npy')
+
+    for i in range(n_dim):
+        print(f'Opening enc_{i}')
+        cov_pred = np.load(f'{path}cov_pred_enc{filenames[i]}.npy')
+        cov_test = np.load(f'{path}cov_test_enc{filenames[i]}.npy')
+        cov_pred = np.transpose(np.transpose(cov_pred)*scal)
+        cov_test = np.transpose(np.transpose(cov_test)*scal)
+        print(cov_pred.shape)
+        k = 0
+        for j in index:
+            print(f'Starting mean on the {k}° diagonal element')
+            temp_a = np.abs((cov_test[:,j] - cov_pred[:,j])/(cov_test[:,j]+10**(-4)))
+            temp_b = np.abs(cov_test[:,j] - cov_pred[:,j])
+            mean_relative_absolute_error[i,k] = temp_a.mean()
+            mean_absolute_error[i,k] = temp_b.mean()
+            k += 1
+        temp_a = np.abs((cov_test - cov_pred)/(cov_test+10**(-4)))
+        temp_b = np.abs(cov_test - cov_pred)
+        tot_rel_abs_error[i] = temp_a.mean()
+        tot_abs_error[i] = temp_b.mean()
+
+    plt.figure('Compare entrire matrix and diagonal relative error')
+    plt.subplot(2,1,1)
+    plt.plot([40,80,100,200,300,400], mean_relative_absolute_error.mean(axis=1),
+             'ko--', label='mean absolute error')
+    plt.ylabel('Digonal MRAE', size=15)
+    plt.xlabel('Encoding nodes', size=15)
+    plt.xticks(size=15)
+    plt.yticks(size=15)
+    plt.title('Mean relative absolute error (MRAE)', size=18)
+    plt.grid()
+    plt.subplot(2,1,2)
+    plt.plot([40,80,100,200,300,400],tot_rel_abs_error,'ko--',label='mean absolute error')
+    plt.ylabel('Entire matrix MRAE', size=15)
+    plt.xlabel('Encoding nodes', size=15)
+    plt.xticks(size=15)
+    plt.yticks(size=15)
+    plt.grid()
+
+    plt.figure('Compare entrire matrix and diagonal absolute error')
+    plt.subplot(2,1,1)
+    plt.plot([40,80,100,200,300,400],mean_absolute_error.mean(axis=1),
+             'ko--',label='mean absolute error')
+    plt.ylabel('Digonal mean absolute error', size=15)
+    plt.xlabel('Encoding nodes', size=15)
+    plt.title('Compare entrire matrix and diagonal absolute error', size=15)
+    plt.grid()
+    plt.subplot(2,1,2)
+    plt.plot([40,80,100,200,300,400],tot_abs_error,'ko--',label='mean absolute error')
+    plt.ylabel('Entire matrix mean absolute error', size=12)
     plt.xlabel('Encoding nodes', size=12)
-    plt.title(f'Mean Absolute Error entire diagonal Graph', size=15)
+    plt.grid()
 
-    if 0:
-        for i in range(len(titles)):
+def print_mean_std(filename):
+    """Print mean values and standard deviation of every element in the covariance matrix.
 
-            plt.figure(f'Mean Absolute Error Graph {titles[i]}')
-            plt.subplot(2,1,1)
-            plt.plot(np.arange(enc_lim[0],enc_lim[1]+1),mean_absolute_error[:,i],'-',label='mean absolute error')
-            plt.ylabel('Errors', size=12)
-            plt.xlabel('Encoding nodes', size=12)
-            plt.title(f'Mean Absolute Error Graph {titles[i]}', size=15)
-            plt.subplot(2,1,2)
-            plt.plot(np.arange(enc_lim[0],enc_lim[1]+1),mean_relative_absolute_error[:,i],'-',label='mean relative absolute error')
-            plt.ylabel('Errors', size=12)
-            plt.xlabel('Encoding nodes', size=12)
-            #plt.title(f'Mean Absolute Error Graph {titles[i]}', size=15)
-
+    Args: 
+        filename: string. Filename of covariance matrix.
+    """
+    cov = np.load(filename)
+    for i in range(15):
+        print(f'Element {i}')
+        print(f'Mean = {cov[:,i].mean():.2e}, Std = {cov[:,i].std():.2e}')
 
 if __name__ == "__main__":
-    cov_pred = np.load('/mnt/c/Users/HP/Desktop/cov_pred_enc7.npy')
-    cov_test = np.load('/mnt/c/Users/HP/Desktop/cov_test_enc7.npy')
-    scal = np.load('/mnt/c/Users/HP/Desktop/scal.npy')
-    #cov_pred = np.transpose(np.transpose(cov_pred)*scal)
-    #cov_test = np.transpose(np.transpose(cov_test)*scal)
-    #scaler = preprocessing.StandardScaler().fit(cov)
-    #cov = scaler.transform(cov)
-    '''
-    i=0
-    
-    for i in range(15):
-        plt.figure(i)
-        plt.subplot(2,1,1)
-        pcov = percentile_matrix(cov[:,i],95)
-        #cov[cov[:,i] < np.percentile(cov[:,1],95)]
-        plot_hist(cov[:,i], n_bins = 100, title=f'Histogram column {i}', xlabel=f'Matrix element n. {i}', ylabel='N')
-        plt.subplot(2,1,2)
-        plot_hist(cov[:,i], n_bins = 100, title='', xlabel=f'Matrix element n. {i}', ylabel='N')
-        plt.ylim([0.,10.])
-        plt.show()
-    '''
-    if 0:
-        mean_relative_absolute_error = np.zeros(15)
-        mean_absolute_error = np.zeros(15)
-        for i in range(15):
-            a = np.abs((cov_test[:,i] - cov_pred[:,i])/cov_test[:,i])
-            b = np.abs(cov_test[:,i] - cov_pred[:,i])
-            mean_relative_absolute_error[i] = a.mean()
-            mean_absolute_error[i] = b.mean()
+    import numpy as np
+    import matplotlib.pyplot as plt
 
-            print(f'Relative Absolute Error = {mean_relative_absolute_error[i]}\nAbsolute Error = {mean_absolute_error[i]}\n')
+    # Fixing random state for reproducibility
+    np.random.seed(123)
 
+    #matrix_error_graph('/mnt/c/Users/HP/Desktop/progetto_cmep/data/outputs/')
+    #element_error('/mnt/c/Users/HP/Desktop/progetto_cmep/data/outputs/', 15)
+    element_error_tot('/mnt/c/Users/HP/Desktop/progetto_cmep/data/outputs/')
+    #matrix_error_graph_bs('/mnt/c/Users/HP/Desktop/progetto_cmep/data/outputs/',
+    #                      ['5_bs40','5_bs80','5_bs100', '5', '5_bs300','5_bs400'])
+    #print_mean_std('/mnt/c/Users/HP/Desktop/progetto_cmep/data/inputs/cov_tot.npy')
 
-    matrix_error_graph('/mnt/c/Users/HP/Desktop/progetto_cmep/data/outputs/')
-
-    index = [0, 5, 9, 12, 14]
-    titles = ['qoverp', 'lambda', 'phi', 'dxy', 'dsz']
-    # Da applicare taglio
-    if 0: 
-        for i, elem in enumerate(index):
-            print(f'i = {elem}')
-            res = (cov_test[:, elem] - cov_pred[:, elem])
-            res_norm = (cov_test[:, elem] - cov_pred[:, elem])/cov_test[:, elem]
-            #Calculate residuals.
-            plt.title(titles[i],size=15)
-
-            plt.subplot(2,1,1)
-            perc = np.percentile(abs(res),95)
-            hist_res(res[(res<perc) & (res>-perc)], n_bins=80, y_label='N', x_label = 'x_decompresso - x_originale')
-            plt.title(titles[i],size=15)
-
-            plt.subplot(2,1,2)
-            perc = np.percentile(abs(res_norm),95)
-            hist_res(res_norm[(res_norm<perc) & (res_norm>-perc)], n_bins=80, y_label='N', x_label = '(x_decompresso - x_originale)/x_originale')
     plt.show()
-    
-    '''
-    l = []
-    i = 0
-    for row in cov_pred:
-        x = 0
-        i = i+1
-        for e in row:
-            x = x + e**2
-        l.append(x)
-        if i == 10**5: break
-
-    print(l)
-    plt.hist(l,bins=50)
-    plt.show()
-    '''
-    '''
-    for i, elem in enumerate(index):
-        plt.subplot(2,1,1)
-        plt.title(titles[i]+' distributions', size=15)
-        plt.ylabel('test data',size=12)
-        plt.hist(cov_test[:,elem],100)
-        plt.subplot(2,1,2)
-        plt.ylabel('predicted data',size=12)
-        plt.hist(cov_pred[:,elem],100)
-        plt.xlabel(titles[i],size=12)
-        plt.show()
-    '''
-
-    #fare metrica solo sulla diagonale
-    #econding di 2,3,4
-    #Dx/(x+epsilon) -> questo perché il problema può essere che x è ~ 0. epsilon ~ 10^-5 (giusto per non avere una divisione per 0).
-    #fare un grafico con errore quadratico medio relativo su ogni elemento della diagonale
-    #Fare confronto con quello che usa CMS di default.
-    #hyperparameter scan, hyperparameter optimization.

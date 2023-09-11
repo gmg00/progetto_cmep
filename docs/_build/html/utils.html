@@ -1,0 +1,260 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>utils package &#8212; progetto_cmep  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="main module" href="main.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="utils-package">
+<h1>utils package<a class="headerlink" href="#utils-package" title="Permalink to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">¶</a></h2>
+</section>
+<section id="module-utils.plot_distributions">
+<span id="utils-plot-distributions-module"></span><h2>utils.plot_distributions module<a class="headerlink" href="#module-utils.plot_distributions" title="Permalink to this heading">¶</a></h2>
+<p>This module is used to analyze datasets before and after being processed by the model.
+It contains functions useful to graph the evolution of some important metrics
+as encoding space dimension and batch_size dimension change.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.plot_distributions.element_error">
+<span class="sig-prename descclassname"><span class="pre">utils.plot_distributions.</span></span><span class="sig-name descname"><span class="pre">element_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/plot_distributions.html#element_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.plot_distributions.element_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Produce graphs about MRAE and MAE of every element given the encoding space of the test.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>path: directory path in which predicted and test matrix are contained.
+enc: int. Encoding space dimension.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.plot_distributions.element_error_tot">
+<span class="sig-prename descclassname"><span class="pre">utils.plot_distributions.</span></span><span class="sig-name descname"><span class="pre">element_error_tot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enc_lim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(5,</span> <span class="pre">15)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/plot_distributions.html#element_error_tot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.plot_distributions.element_error_tot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Produce graphs about MRAE and MAE of every element mediated on every test with encoding space
+from enc_lim[0] to enc_lim[1].</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>path: directory path in which predicted and test matrix are contained.
+enc_lim: tuple. Minimum and maximum of encoding space dimension. Default = (3,15)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.plot_distributions.hist_res">
+<span class="sig-prename descclassname"><span class="pre">utils.plot_distributions.</span></span><span class="sig-name descname"><span class="pre">hist_res</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">res</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'x</span> <span class="pre">label'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Residuals'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/plot_distributions.html#hist_res"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.plot_distributions.hist_res" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take residuals and plot histogram.</p>
+<dl>
+<dt>Args:</dt><dd><p>res: residuals array.</p>
+<p>n_bins: number of bins. Deafault = 50.</p>
+<p>title: title of histogram. Default = ‘Residuals distribution’</p>
+<p>x_label: label of x axis. Default = ‘x label’</p>
+<p>y_label: label of y axis. Default = ‘Residuals’</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.plot_distributions.matrix_error_graph">
+<span class="sig-prename descclassname"><span class="pre">utils.plot_distributions.</span></span><span class="sig-name descname"><span class="pre">matrix_error_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enc_lim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(3,</span> <span class="pre">15)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/plot_distributions.html#matrix_error_graph"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.plot_distributions.matrix_error_graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Produce graphs about absolute error and relative absolute error of matrix elements.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>path: directory path in which predicted and test matrix are contained.
+enc_lim: tuple. Minimum and maximum of encoding space dimension. Default = (3,15)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.plot_distributions.matrix_error_graph_bs">
+<span class="sig-prename descclassname"><span class="pre">utils.plot_distributions.</span></span><span class="sig-name descname"><span class="pre">matrix_error_graph_bs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filenames</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/plot_distributions.html#matrix_error_graph_bs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.plot_distributions.matrix_error_graph_bs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Produce graphs about absolute error and relative absolute error of matrix elements.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>path: directory path in which predicted and test matrix are contained.
+filenames: last part of file name.
+Default = [‘5_bs40’,’5_bs80’,’5_bs100’, ‘5’, ‘5_bs300’,’5_bs400’].</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.plot_distributions.plot_hist">
+<span class="sig-prename descclassname"><span class="pre">utils.plot_distributions.</span></span><span class="sig-name descname"><span class="pre">plot_hist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'element'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'N'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/plot_distributions.html#plot_hist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.plot_distributions.plot_hist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take residuals and plot histogram.</p>
+<dl>
+<dt>Args:</dt><dd><p>x_arr: array to plot.</p>
+<p>n_bins: number of bins. Deafault = 50.</p>
+<p>title: title of histogram. Default = ‘’.</p>
+<p>xlabel: label of x axis. Default = ‘element’.</p>
+<p>ylabel: label of y axis. Default = ‘N’.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.plot_distributions.print_mean_std">
+<span class="sig-prename descclassname"><span class="pre">utils.plot_distributions.</span></span><span class="sig-name descname"><span class="pre">print_mean_std</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/plot_distributions.html#print_mean_std"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.plot_distributions.print_mean_std" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print mean values and standard deviation of every element in the covariance matrix.</p>
+<dl class="simple">
+<dt>Args: </dt><dd><p>filename: string. Filename of covariance matrix.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-utils.plot_history">
+<span id="utils-plot-history-module"></span><h2>utils.plot_history module<a class="headerlink" href="#module-utils.plot_history" title="Permalink to this heading">¶</a></h2>
+<p>This module is used to analyze loss and metric functions.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.plot_history.import_histories">
+<span class="sig-prename descclassname"><span class="pre">utils.plot_history.</span></span><span class="sig-name descname"><span class="pre">import_histories</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filenames</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/plot_history.html#import_histories"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.plot_history.import_histories" title="Permalink to this definition">¶</a></dt>
+<dd><p>Import history files.</p>
+<dl class="simple">
+<dt>Args: </dt><dd><p>filenames: array of strings containing filenames for every history file.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.plot_history.plot_history">
+<span class="sig-prename descclassname"><span class="pre">utils.plot_history.</span></span><span class="sig-name descname"><span class="pre">plot_history</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">histories</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/plot_history.html#plot_history"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.plot_history.plot_history" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot loss and validation loss functions.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>histories: matrix with all loss and validation loss functions.
+names: array of strings containing labels for every set of loss and val_loss.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.plot_history.plot_metric">
+<span class="sig-prename descclassname"><span class="pre">utils.plot_history.</span></span><span class="sig-name descname"><span class="pre">plot_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">histories</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/plot_history.html#plot_metric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.plot_history.plot_metric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot metric functions.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>histories: matrix with all metrics functions.
+metric_name: name of the metric.
+names: array of strings containing labels for every run.
+n: number of points mediated during smoothing.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="utils.plot_history.smoothing_metric">
+<span class="sig-prename descclassname"><span class="pre">utils.plot_history.</span></span><span class="sig-name descname"><span class="pre">smoothing_metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils/plot_history.html#smoothing_metric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#utils.plot_history.smoothing_metric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute smoothing of n elements of array arr.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>arr: points of metrics that will be smoothed.
+n: number of points mediated during smoothing.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-utils">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-utils" title="Permalink to this heading">¶</a></h2>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">progetto_cmep</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">progetto_cmep</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="main.html">main module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">utils package</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">progetto_cmep</a><ul>
+      <li>Previous: <a href="main.html" title="previous chapter">main module</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2023, Gian Marco Gori.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.3.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+      |
+      <a href="_sources/utils.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

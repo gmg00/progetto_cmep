@@ -1,4 +1,4 @@
-import sys
+"""This module is used to test if get_cov.py and get_par.py work correctly."""
 import gc
 import numpy as np
 from DataFormats.FWLite import Events, Handle
@@ -22,20 +22,21 @@ size_before = 0
 
 events = Events(['root://eospublic.cern.ch//eos/opendata/cms/Run2012A/ElectronHad/AOD/22Jan2013-v1/20000/FEE9E03A-F581-E211-8758-002618943901.root'])
 handle = Handle('std::vector<reco::Track>')
-label = ('generalTracks')
+label = 'generalTracks'
 
 ROOT.gROOT.SetBatch()
 
 k = 0 #File index.
 N = 5 #Number of random tests.
-index = np.random.randint(0, cov.shape[0], N) #Index array.  
+index = np.random.randint(0, cov.shape[0], N) #Index array.
 
 i = 0 #Tracks
 for event in events:
 	event.getByLabel(label,handle)
 	tracks = handle.product()
 	for tr in tracks:
-		if (i % 50000 == 0): print('i = %d' %i)
+		if i % 50000 == 0:
+			print('i = %d' %i)
 		#If i in index test if tr.covariance and the registered one are equal.
 		if i in index:
 			tmp = cov[i - size_before, :]
@@ -46,13 +47,14 @@ for event in events:
 			condition_2 = np.array_equal(tmp2, [tr.chi2(), tr.ndof(), tr.pt(), tr.eta(), tr.phi()])
 			#Evaluate if a random element of matrix is equal to the one registered.
 			if condition_1 & condition_2: print('OK')
-			else: 
+			else:
 				raise ValueError
 		i = i + 1
 		#Load another file when one end.
 		if i - size_before == cov.shape[0]:
-			if k == N_of_files: break
-			k = k + 1 
+			if k == N_of_files:
+				break
+			k = k + 1
 			size_before = cov.shape[0] + size_before #Update size_before.
 			del cov
 			del par
@@ -60,7 +62,7 @@ for event in events:
 			print('Loading next .npy')
 			cov = np.load('/home/cms-opendata/COV2/cov_' + str(k) + '.npy')
 			par = np.load('/home/cms-opendata/PAR2/par_' + str(k) + '.npy')
-			index = np.random.randint(0, cov.shape[0], N) + size_before # index array  
+			index = np.random.randint(0, cov.shape[0], N) + size_before # index array
 			print('Restarting from %d' %i)
-			
+
 
