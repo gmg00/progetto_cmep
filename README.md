@@ -18,17 +18,17 @@ Nella cartella utils/get_events ci sono i moduli utilizzati nella macchina virtu
 ## Risultati
 Nei seguenti grafici si mostra l’evoluzione dell’errore assoluto relativo medio (MRAE) e dell’errore assoluto medio (MAE) sulla diagonale e sull’intera matrice al variare della dimensione dell’encoding space:
 
-!(docs\images\MAE2.png)
+![loo](docs\images\MAE2.png)
 
-!(docs\images\MRAE2.png)
+![loo](docs\images\MRAE2.png)
 
 Si nota che per alcune configurazioni un miglioramento della performance totale corrisponde ad un peggioramento sulle performance della diagonale e viceversa. Si vede che l’errore relativo assoluto medio su tutta la matrice é sempre superiore a 1, questo é dovuto principalmente ad alcuni elementi prossimi a 0 che hanno MRAE molto alto. Si mostra di seguito il grafico degli errori medi assoluti relativi (MRAE) e degli errori medi assoluti (MAE) sugli elementi della matrice mediati sui test fatti con spazio di encoding differente:
 
-!(docs\images\Element_errors_2.png)
+![loo](docs\images\Element_errors_2.png)
 
 Di seguito la struttura del modello utilizzato:
 
-!(docs\images\model_enc5.png)
+![loo](docs\images\model_enc5.png)
 
 ## License
 Copyright (C) 2023  gmg00
