@@ -116,4 +116,3 @@ if __name__ == "__main__":
     plot_metric(histories, 'my_metric2', 30, names)
 
     plt.show()
-
